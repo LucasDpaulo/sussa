@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+.agents/
+.codex/
+.aws/
+*.log
+node_modules/
+artifacts/

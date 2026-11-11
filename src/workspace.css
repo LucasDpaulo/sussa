@@ -1,0 +1,106 @@
+/* Full-screen landscape with independent, movable tool windows. */
+body.workspace,html:has(body.workspace){height:100%;overflow:hidden;background:#171b20}
+.workspace .generated-screen{background:transparent!important;padding:0!important;min-height:0!important}
+.workspace .ly-anchor-canvas,.workspace #page-flow{min-height:0!important;height:0!important;padding:0!important}
+#scene{position:fixed;inset:0;z-index:0;background:#151a20;overflow:hidden}
+#scene-image,#scene-video,#scene-youtube{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#scene-image{background:url('/assets/forest-trail.webp') center/cover no-repeat}
+#scene-image.neutral{background-image:radial-gradient(at 70% 0%,#4a515e,#1c2129)}
+#scene-youtube{pointer-events:none;overflow:hidden}
+#scene-youtube iframe{position:absolute;left:50%;top:50%;width:max(100vw,177.78vh);height:max(100vh,56.25vw);transform:translate(-50%,-50%);border:0;pointer-events:none}
+.workspace #workspace-ui{position:fixed;inset:0;pointer-events:none;z-index:10;width:100%;height:100%;padding:0;margin:0;display:block}
+.workspace #workspace-ui>.floating-panel{position:fixed!important;display:block!important;left:100px;top:74px;width:350px!important;max-width:calc(100vw - 16px)!important;height:auto!important;max-height:calc(100dvh - 80px)!important;min-height:0!important;padding:0!important;margin:0!important;border:1px solid #ffffff0b!important;border-radius:8px!important;overflow:auto;background:#262c34!important;box-shadow:0 8px 26px #0003!important;pointer-events:auto;scrollbar-width:thin;scrollbar-color:#676b74 #262c34;transition:opacity .25s;}
+.workspace #workspace-ui>.floating-panel[hidden]{display:none!important}
+.workspace #workspace-ui>#viewport-1-winner-hero{width:370px!important;overflow:visible}
+.workspace #workspace-ui>#viewport-1-winner-stats{width:580px!important}
+.workspace #workspace-ui>#viewport-1-winner-player{width:400px!important}
+.workspace #workspace-ui>.floating-panel>:not(.window-handle):not(.sr-only){margin:16px 18px}
+.workspace #workspace-ui>.floating-panel>.panel-content{margin:18px}
+.workspace .window-handle{position:sticky;top:0;z-index:2;min-height:42px;display:flex;align-items:center;gap:14px;padding:6px 12px 6px 18px;border-bottom:1px solid #4d525a;background:#262c34;cursor:grab;touch-action:none;user-select:none;font-size:12px}
+.workspace .window-handle:active{cursor:grabbing}
+.workspace .window-handle:focus-visible{outline:2px solid #f49b83;outline-offset:-3px}
+.window-handle .drag-dots{color:#9fa4ac;font-size:20px;line-height:1}
+.window-handle button{margin-left:auto;background:transparent;border:0;padding:0 8px;font-size:22px;line-height:25px;border-radius:4px}
+.workspace #workspace-ui>.floating-panel header{margin-top:16px;gap:10px}
+.workspace h2{font-size:15px;font-weight:600}
+.workspace .hint{font-size:11px;line-height:1.6}
+.workspace .empty{padding:25px 5px}
+.workspace .empty p{font-size:14px}
+.workspace .empty>span{font-size:28px;margin-bottom:8px}
+.workspace .task-source{align-items:flex-start;font-size:10px}
+.workspace .task-source button{font-size:10px}
+.workspace #task-date{max-width:136px;font-size:11px;padding:6px}
+.workspace #viewport-1-winner-tasks footer{font-size:10px}
+.workspace #workspace-ui>.floating-panel .timer-body{margin:8px 12px 0}
+.timer-row{display:flex;align-items:center;gap:12px}
+.workspace #clock{font-size:48px;line-height:1.3;letter-spacing:-1.8px;font-family:Inter,system-ui,sans-serif;flex:1}
+.workspace #toggle-timer{padding:6px 18px;min-width:100px;background:transparent;border:1px solid #e5e7eb;color:#fff;font-size:13px;border-radius:10px;font-weight:500;white-space:nowrap}
+.workspace #toggle-timer:hover{background:#414751}
+.workspace #reset{background:none;border:0;font-size:0;padding:5px;width:28px;min-width:28px}
+.workspace #reset::after{content:'↻';font-size:23px}
+.timer-footer{display:flex;align-items:center;gap:6px;position:relative}
+.workspace .mode-tabs{flex:1;background:none;border:0;border-radius:0;padding:0;gap:10px;justify-content:space-between}
+.workspace .mode-tabs button{flex:initial;border-radius:0;background:none!important;padding:8px 0 7px;border-bottom:2px solid transparent;color:#f0f1f4;font-size:12px}
+.workspace .mode-tabs button.active{border-color:#d5d8de}
+.workspace #timer-progress{width:100%;margin:0;height:2px;background:transparent}
+.workspace #timer-progress i{background:#f49b83}
+#timer-config{margin:0;color:#d7dbe3;position:static}
+#timer-config>summary{list-style:none;font-size:19px;padding:4px;color:#f0f1f4;cursor:pointer}
+#timer-config>summary::-webkit-details-marker{display:none}
+#timer-config #settings-form{position:absolute;top:100%;right:-12px;left:-12px;z-index:5;display:block;background:#262c34;border:1px solid #535964;border-radius:0 0 8px 8px;padding:18px;box-shadow:0 10px 25px #0004}
+#timer-config #settings-form>p:first-child{font-size:12px;margin-bottom:12px}
+#timer-config label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;font-size:12px}
+#timer-config input{max-width:85px;padding:6px!important}
+#timer-config #settings-form>button{width:100%;margin-top:12px;font-size:12px}
+.workspace #workspace-ui>#viewport-1-winner-hero:has(#timer-config[open]){padding-bottom:335px!important;overflow:auto}
+.workspace .sound-row{grid-template-columns:110px 1fr 32px;gap:8px;margin:18px 0;font-size:12px}
+.workspace #media-container iframe{height:225px}
+.workspace .media-empty{padding:15px 8px}
+.workspace .media-empty p{font-size:13px}
+.workspace .periods{min-width:230px}
+.workspace .stats-summary strong{font-size:25px}
+.workspace #workspace-ui>#viewport-1-winner-nav{position:fixed!important;left:16px!important;top:70px!important;width:66px!important;height:auto!important;min-height:0!important;max-height:calc(100dvh - 84px)!important;overflow:auto;display:flex!important;flex-direction:column!important;padding:7px 5px!important;margin:0!important;border:1px solid #ffffff0b!important;border-radius:8px!important;background:#262c34!important;pointer-events:auto;z-index:500;box-shadow:0 6px 18px #0002}
+.workspace #viewport-1-winner-nav button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;margin:3px 0;padding:9px 2px;width:100%;min-height:56px;font-size:10px;color:#f3f4f6;border:0;background:none;border-radius:6px;line-height:1.3}
+.workspace #viewport-1-winner-nav button>span{font-size:23px;line-height:1.2}
+.workspace #viewport-1-winner-nav button.active{color:#f49b83;background:#44474a}
+#workspace-bar{position:fixed;top:14px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:600;pointer-events:none}
+.top-group{display:flex;align-items:center;gap:3px;background:#262c34;border:1px solid #ffffff0b;border-radius:6px;min-height:40px;padding:3px 7px;box-shadow:0 6px 18px #0002;pointer-events:auto}
+.top-group button{border:0;background:none;color:white;padding:6px 10px;font-size:15px}
+.workspace-name{font-size:12px;padding:0 12px 0 5px;white-space:nowrap;border-right:1px solid #555a63}
+.room-select-label{display:flex;align-items:center;font-size:11px;gap:5px;margin:0 4px;color:#b9bec7}
+.room-select-label select{background:none!important;border:0!important;padding:5px!important;font-size:12px;width:auto!important;color:white!important;max-width:130px}
+.workspace #focus-toggle{font-size:12px}
+.workspace-chrome,#workspace-ui{transition:opacity .3s}
+body.focus-hidden #workspace-ui,body.focus-hidden .workspace-chrome{opacity:0!important;pointer-events:none!important}
+body.focus-hidden #workspace-ui *{pointer-events:none!important}
+#scene-url-form{display:block;margin-top:20px}
+#scene-url-form label{display:block;font-size:12px}
+#scene-url-form input{margin:8px 0;font-size:11px}
+#scene-url-form button{width:100%;font-size:12px}
+.scene-card{padding:0;overflow:hidden;width:100%;margin:14px 0 10px;border-radius:7px;text-align:left;border:1px solid #5a626e}
+.scene-card img{width:100%;height:140px;object-fit:cover}
+.scene-card span{display:block;padding:9px 12px;font-size:12px}
+#scene-status{font-size:12px;color:#f4b59f;margin-top:12px}
+.scene-controls{margin:15px 0}
+.scene-controls label{display:block;font-size:12px;margin-top:12px}
+.scene-controls input{display:block;width:100%;margin-top:9px}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap}
+.workspace #settings label{font-size:13px}
+.workspace #hide-after{max-width:80px}
+@media(max-width:600px){
+  #workspace-bar{left:8px;right:8px;top:8px;gap:6px}
+  .workspace-name{display:none}.top-group{padding:3px}.top-group button{padding:6px 8px}
+  .room-select-label{font-size:0}.room-select-label select{font-size:12px}
+  .workspace #workspace-ui>#viewport-1-winner-nav{left:8px!important;top:62px!important;width:64px!important}
+  .workspace #workspace-ui>.floating-panel{width:calc(100vw - 96px)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 80px)!important}
+  .workspace #workspace-ui>#viewport-1-winner-hero{width:min(370px,calc(100vw - 96px))!important}
+  .workspace #workspace-ui>#viewport-1-winner-stats,.workspace #workspace-ui>#viewport-1-winner-player{width:calc(100vw - 96px)!important}
+  .workspace #clock{font-size:36px}.timer-row{gap:5px}.workspace #toggle-timer{min-width:75px;padding:5px 7px;font-size:11px}
+  .workspace #reset{min-width:20px;width:20px;padding:2px}.workspace .mode-tabs{gap:5px}.workspace .mode-tabs button{font-size:10px}
+  .workspace #workspace-ui>.floating-panel>:not(.window-handle):not(.sr-only){margin:12px}
+  .workspace .sound-row{grid-template-columns:1fr 1fr 30px;font-size:10px;gap:5px}
+  .workspace .window-handle{padding-left:12px}.workspace h2{font-size:13px}
+  .workspace .periods{min-width:0;width:100%}.workspace .stats-summary{grid-template-columns:1fr}.workspace .stats-summary>div{border:0;padding:0}.workspace .stats-summary strong{font-size:22px}
+  .workspace .stats-controls>div{flex-wrap:wrap;justify-content:flex-start}.workspace #task-date{width:100%;max-width:100%}
+}
+@media(prefers-reduced-motion:reduce){.workspace-chrome,#workspace-ui{transition:none}}
