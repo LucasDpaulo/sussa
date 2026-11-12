@@ -18,6 +18,11 @@ export function advance(state, now = Date.now()) {
 }
 export function bounds(period, date = new Date()) {
   const start = new Date(date); start.setHours(0, 0, 0, 0);
+  if (period === 'last7' || period === 'last14') {
+    const end = new Date(start); end.setDate(end.getDate() + 1);
+    start.setDate(start.getDate() - (period === 'last7' ? 6 : 13));
+    return [start, end];
+  }
   if (period === 'week') start.setDate(start.getDate() - (start.getDay() + 6) % 7);
   if (period === 'month') start.setDate(1);
   if (period === 'year') start.setMonth(0, 1);
@@ -56,4 +61,27 @@ export function embedUrl(value) {
   }
   if (host === 'music.apple.com' && /^\/[a-z]{2}\/(album|playlist|station)\//.test(url.pathname)) return `https://embed.music.apple.com${url.pathname}${url.search}`;
   return null;
+}
+
+// Current local-day streak; yesterday remains active until today has ended.
+export function focusStreak(sessions, now = new Date()) {
+  const daily = new Map();
+  for (const session of sessions) {
+    let cursor = session.start;
+    const end = Math.min(session.end, +now);
+    if (!Number.isFinite(cursor) || !Number.isFinite(end)) continue;
+    while (cursor < end) {
+      const next = new Date(cursor); next.setHours(24, 0, 0, 0);
+      const stop = Math.min(end, +next), key = dayKey(new Date(cursor));
+      daily.set(key, (daily.get(key) || 0) + stop - cursor);
+      cursor = stop;
+    }
+  }
+  const date = new Date(now); date.setHours(0, 0, 0, 0);
+  if (!daily.has(dayKey(date))) date.setDate(date.getDate() - 1);
+  let days = 0, time = 0;
+  while (daily.has(dayKey(date))) {
+    days++; time += daily.get(dayKey(date)); date.setDate(date.getDate() - 1);
+  }
+  return { days, time };
 }

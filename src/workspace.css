@@ -71,8 +71,8 @@ body.workspace,html:has(body.workspace){height:100%;overflow:hidden;background:#
 .room-select-label select{background:none!important;border:0!important;padding:5px!important;font-size:12px;width:auto!important;color:white!important;max-width:130px}
 .workspace #focus-toggle{font-size:12px}
 .workspace-chrome,#workspace-ui{transition:opacity .3s}
-body.focus-hidden #workspace-ui,body.focus-hidden .workspace-chrome{opacity:0!important;pointer-events:none!important}
-body.focus-hidden #workspace-ui *{pointer-events:none!important}
+body.focus-hidden .workspace-chrome{opacity:0!important;pointer-events:none!important}
+body.focus-hidden .workspace-chrome *{pointer-events:none!important}
 #scene-url-form{display:block;margin-top:20px}
 #scene-url-form label{display:block;font-size:12px}
 #scene-url-form input{margin:8px 0;font-size:11px}
@@ -104,3 +104,344 @@ body.focus-hidden #workspace-ui *{pointer-events:none!important}
   .workspace .stats-controls>div{flex-wrap:wrap;justify-content:flex-start}.workspace #task-date{width:100%;max-width:100%}
 }
 @media(prefers-reduced-motion:reduce){.workspace-chrome,#workspace-ui{transition:none}}
+
+/* Shared control geometry and motion, adapted from Apple HIG to the web. */
+body.workspace{--ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;--ui-surface:#292d34;--ui-hover:#ffffff16;--ui-separator:#ffffff14;font-family:var(--ui-font);-webkit-font-smoothing:antialiased}
+.workspace :is(button,input,select,textarea,summary),.workspace :is(h2,h3,.empty p,.stats-summary strong,#clock){font-family:var(--ui-font)}
+.workspace button{transition:background-color 140ms ease,color 140ms ease,box-shadow 140ms ease,transform 140ms ease;border-radius:10px}
+.workspace button:active:not(:disabled){transform:scale(.96)}
+.workspace :is(button,summary,input,select):focus-visible{outline:2px solid #a8caff;outline-offset:3px}
+.workspace #workspace-ui>.floating-panel{border-radius:18px!important;border-color:#ffffff1c!important;background:var(--ui-surface)!important;box-shadow:0 18px 60px #0005,0 2px 8px #0003!important;transform-origin:50% 15%;transition:none}
+.workspace .window-handle{min-height:50px;padding:4px 8px 4px 18px;border-radius:18px 18px 0 0;background:var(--ui-surface);border-bottom:1px solid var(--ui-separator);font-size:13px;font-weight:600;letter-spacing:-.1px}
+.window-handle .drag-dots{margin-left:auto;font-weight:400;opacity:.5}
+.workspace .close-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;min-height:36px;padding:7px;margin:0;border:0;border-radius:50%;background:#ffffff0c;color:#c8cbd1;line-height:1}
+.workspace .close-button svg{width:20px;height:20px;pointer-events:none}
+.workspace #workspace-ui>#viewport-1-winner-nav{border-radius:16px!important;padding:6px!important;border-color:#ffffff18!important;background:#292d34ed!important;backdrop-filter:blur(20px)}
+.workspace #viewport-1-winner-nav button{border-radius:11px;min-height:58px;margin:3px 0;gap:5px;padding:8px 2px;font-size:11px;font-weight:500;letter-spacing:0;color:#d1d3d8}
+.workspace #viewport-1-winner-nav button>span{display:flex;align-items:center;justify-content:center;width:24px;height:24px}
+.workspace #viewport-1-winner-nav button.active{background:#ffffff1c;color:#fff;box-shadow:inset 0 0 0 1px #ffffff08}
+@media(hover:hover){
+  .workspace #viewport-1-winner-nav button:hover{background:#ffffff13;color:#fff;transform:translateY(-1px)}
+  .workspace #viewport-1-winner-nav button.active:hover{background:#ffffff25}
+  .workspace .close-button:hover{background:#ffffff20;color:#fff}
+  .workspace .top-group button:hover,.workspace #timer-config>summary:hover{background:var(--ui-hover)}
+}
+.workspace .top-group{border-radius:13px;border-color:#ffffff18;background:#292d34ed;backdrop-filter:blur(20px);padding:4px 6px}
+.workspace .top-group button{min-height:36px;border-radius:9px}
+.workspace .workspace-name{border-right-color:var(--ui-separator);font-weight:500;font-size:13px;padding-right:12px;margin-right:4px}
+.workspace .room-select-label{font-size:12px;gap:8px}
+.workspace #clock{font-variant-numeric:tabular-nums;letter-spacing:-1.5px;font-weight:400}
+.workspace #toggle-timer{min-height:40px;border-color:#ffffff50;border-radius:11px}
+.workspace #reset{width:36px;min-width:36px;min-height:40px}
+.workspace .mode-tabs{background:#191c224d;border:1px solid #ffffff08;border-radius:11px;gap:2px;padding:3px;margin:8px 0}
+.workspace .mode-tabs button{flex:1;border:0;border-radius:8px;padding:8px 3px;min-height:34px;color:#bfc3ca;font-size:11px;white-space:nowrap}
+.workspace .mode-tabs button.active{background:#ffffff1c!important;color:#fff;box-shadow:0 1px 4px #0002}
+.workspace #timer-config>summary{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;transition:background 140ms}
+.workspace #timer-config #settings-form{border-radius:14px;border-color:#ffffff1c;background:var(--ui-surface);box-shadow:0 16px 36px #0004}
+.workspace h2{font-size:16px;line-height:1.35;font-weight:600;letter-spacing:-.25px}
+.workspace .hint{font-size:12px;line-height:1.5}
+.workspace .sound-row{font-size:13px;margin:20px 0;gap:10px}
+.workspace :is(input:not([type=range]):not([type=checkbox]):not([type=file]),select){border-radius:10px;border-color:#ffffff20}
+.workspace dialog{border-radius:22px;border-color:#ffffff24;background:#292d34;padding:24px;box-shadow:0 24px 90px #0006;transform-origin:50% 40%}
+.workspace dialog header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.workspace dialog::backdrop{background:#090b1066;backdrop-filter:blur(6px)}
+.workspace dialog p{line-height:1.55}
+.workspace dialog label{padding:8px 0;border-bottom:1px solid var(--ui-separator)}
+@media(pointer:coarse){.workspace .close-button{width:44px;height:44px;flex-basis:44px}.workspace .top-group button{min-height:44px}.workspace #reset{min-height:44px}.workspace .mode-tabs button{min-height:40px}}
+@media(max-width:600px){
+  .workspace .mode-tabs{gap:0}.workspace .mode-tabs button{font-size:10px;padding-inline:2px}
+  .workspace #timer-config>summary{width:30px}
+  .workspace #reset{width:28px;min-width:28px}
+  .workspace .sound-row{font-size:12px;grid-template-columns:1fr 1fr 30px}
+  .workspace #viewport-1-winner-nav button{font-size:10px}
+  .workspace dialog{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){.workspace *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Compact explanations and a clear label/control column in preferences. */
+.workspace .info-button{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;flex:0 0 28px;padding:0;margin:0 0 0 6px;border:1px solid #ffffff30;border-radius:50%;background:transparent;color:#c8cbd1;font:600 13px/1 var(--ui-font);cursor:help}
+.workspace .info-button:hover,.workspace .info-button[aria-expanded=true]{background:#ffffff18;color:#fff;border-color:#ffffff50}
+.workspace .window-handle .info-button{margin-right:0}
+.workspace dialog header .info-button{margin-left:auto}
+.workspace .info-popover{position:fixed;inset:auto;margin:0!important;width:280px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;padding:16px!important;border:1px solid #ffffff26;border-radius:14px;background:#343941;color:#dce0e6;box-shadow:0 12px 40px #0006;font:13px/1.55 var(--ui-font);text-align:left;letter-spacing:normal;z-index:1000}
+.workspace .info-popover:not(:popover-open){display:none!important}
+.workspace .info-popover strong{display:block;font-size:13px;font-weight:600;color:#fff;margin-bottom:8px}
+.workspace .info-copy+.info-copy{margin-top:10px}
+.workspace .info-copy .dot{display:none}
+.workspace #settings{width:min(94vw,460px);padding:24px}
+.workspace #settings header{flex-wrap:nowrap;margin-bottom:16px;gap:8px}
+.workspace #settings h2{font-size:18px;line-height:1.35;font-weight:600;text-align:left;letter-spacing:-.3px;margin:0}
+.workspace #settings>label{display:grid;grid-template-columns:minmax(0,1fr) 80px;align-items:center;gap:20px;min-height:64px;padding:12px 0;margin:0;font-size:14px;line-height:1.4;text-align:left;border-bottom:1px solid var(--ui-separator)}
+.workspace #settings #auto-hide{appearance:none;justify-self:end;flex:none;width:40px;height:24px;min-width:40px;border:0;border-radius:99px;margin:0;background:#616873;position:relative;cursor:pointer;transition:background 140ms}
+.workspace #auto-hide::after{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform 140ms}
+.workspace #settings #auto-hide:checked{background:#83a8df}
+.workspace #auto-hide:checked::after{transform:translateX(16px)}
+.workspace #settings #hide-after{width:80px;max-width:80px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums}
+.workspace #settings>button{width:100%;min-height:42px;text-align:left;margin-top:16px;font-size:14px;padding:10px 14px}
+.workspace #settings>hr{margin:20px 0 4px}
+.workspace .stats-footer{justify-content:flex-end}
+.workspace :is(.floating-panel,dialog){text-align:left;line-height:1.5}
+.workspace :is(.floating-panel,dialog) :is(p,label,small,input,button,select){letter-spacing:normal}
+@media(pointer:coarse){.workspace .info-button{width:36px;height:36px;flex-basis:36px;min-width:36px}}
+
+/* Fine grain and a soft light falloff separate surfaces without visual clutter. */
+.workspace{--surface-texture:url('/assets/surface-grain.svg'),linear-gradient(135deg,#ffffff05 0%,transparent 48%,#00000012 100%)}
+.workspace #workspace-ui>.floating-panel,.workspace dialog,.workspace #timer-config #settings-form{background-image:var(--surface-texture)!important;background-size:160px 160px,100% 100%!important;background-repeat:repeat,no-repeat!important}
+.workspace .window-handle{background-image:linear-gradient(180deg,#ffffff04,transparent);background-color:#292d34e8}
+.workspace .mode-tabs{box-shadow:inset 0 1px 3px #0002;background-image:linear-gradient(180deg,#0000000c,#ffffff03)}
+.workspace .mode-tabs button.active{box-shadow:inset 0 1px 0 #ffffff0b,0 1px 4px #0003}
+.workspace #workspace-ui>#viewport-1-winner-hero{width:344px!important}
+.workspace #viewport-1-winner-hero>.window-handle{min-height:44px;padding-left:16px}
+.workspace #workspace-ui>#viewport-1-winner-hero>.timer-body{margin:12px 14px 10px!important}
+.workspace #viewport-1-winner-hero .timer-row{display:grid;grid-template-columns:minmax(0,1fr) auto 32px;gap:10px;align-items:center}
+.workspace #viewport-1-winner-hero #clock{font-size:46px;line-height:1.1;letter-spacing:-1.5px}
+.workspace #viewport-1-winner-hero #toggle-timer{min-width:94px;min-height:38px;padding:7px 12px;margin:0}
+.workspace #viewport-1-winner-hero #reset{width:32px;min-width:32px;padding:0;margin:0}
+.workspace #viewport-1-winner-hero .timer-footer{gap:8px;margin-top:10px}
+.workspace #viewport-1-winner-hero .mode-tabs{margin:0;min-width:0}
+.workspace #viewport-1-winner-hero #timer-progress{margin-top:8px}
+@media(max-width:600px){
+  .workspace #workspace-ui>#viewport-1-winner-hero{width:min(344px,calc(100vw - 96px))!important}
+  .workspace #workspace-ui>#viewport-1-winner-hero>.timer-body{margin:12px 10px 8px!important}
+  .workspace #viewport-1-winner-hero .timer-row{gap:6px;grid-template-columns:minmax(0,1fr) auto 28px}
+  .workspace #viewport-1-winner-hero #clock{font-size:38px}
+  .workspace #viewport-1-winner-hero #toggle-timer{min-width:78px;padding-inline:8px}
+  .workspace #viewport-1-winner-hero #reset{width:28px;min-width:28px}
+}
+
+/* Statistics: summary, period controls, and one clearly scaled chart. */
+.workspace #stats-shortcut{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding:6px 10px;background:#ffffff0b}
+.workspace #stats-shortcut:hover{background:#ffffff1c}
+.workspace #stats-shortcut span:last-child{font-size:17px}
+.workspace #workspace-ui>#viewport-1-winner-stats{width:540px!important}
+.workspace #viewport-1-winner-stats>header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.workspace #viewport-1-winner-stats h2{font-size:15px}
+.workspace #viewport-1-winner-stats .periods{min-width:0;width:auto;background:#0002;border:0;padding:3px;border-radius:11px}
+.workspace #viewport-1-winner-stats .periods button{border-radius:8px;padding:7px 12px}
+.workspace #viewport-1-winner-stats .stats-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:16px 0;background:#ffffff09;border:1px solid #ffffff09;border-radius:12px}
+.workspace #viewport-1-winner-stats .stats-summary>div{padding:0 16px;border:0;text-align:left}
+.workspace #viewport-1-winner-stats .stats-summary>div+div{border-left:1px solid #ffffff12}
+.workspace #viewport-1-winner-stats .stats-summary small{font-size:11px;white-space:nowrap}
+.workspace #viewport-1-winner-stats .stats-summary strong{display:block;font-size:23px;line-height:1.3;margin-top:7px;font-weight:500;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.workspace #viewport-1-winner-stats .stats-controls{gap:10px;align-items:center}
+.workspace #viewport-1-winner-stats .stats-controls>div{gap:8px;flex-wrap:wrap}
+.workspace #period-label{font-size:12px;font-weight:500}
+.workspace #viewport-1-winner-stats #stats-room{max-width:145px;font-size:11px}
+.workspace #viewport-1-winner-stats .chart-card{padding:16px;background:#ffffff08;border:1px solid #ffffff09;border-radius:12px}
+.workspace .chart-heading{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:500;margin-bottom:20px}
+.workspace #chart-unit{color:#aeb5bf;font-size:11px;font-weight:400}
+.workspace .chart-layout{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px}
+.workspace #chart-scale{height:180px;display:flex;flex-direction:column;justify-content:space-between;color:#aeb5bf;font-size:10px;text-align:right;line-height:1}
+.workspace #chart{display:flex;gap:10px;height:204px;margin:0;padding:0;border:0;align-items:stretch;background:repeating-linear-gradient(to top,transparent 0,transparent 44px,#ffffff0b 44px,#ffffff0b 45px);background-size:100% 180px;background-repeat:no-repeat}
+.workspace #chart .bar-column{min-width:0;gap:8px;flex:1}
+.workspace #chart .bar-track{height:180px;flex:none}
+.workspace #chart .bar-track i{min-height:0;width:min(100%,38px);border-radius:5px 5px 0 0;background:#adcaff}
+.workspace #chart .bar-column>span{font-size:10px;white-space:nowrap;color:#aeb5bf}
+.workspace #chart.dense-chart{gap:3px}
+.workspace #empty-stats{margin:16px 0 0;text-align:center;font-size:12px}
+.workspace #viewport-1-winner-stats .stats-footer{margin-top:12px}
+.workspace #viewport-1-winner-stats .stats-footer button{border:0;color:#b8c1ce;padding:4px 0;font-size:11px}
+@media(max-width:600px){
+ .workspace #workspace-ui>#viewport-1-winner-stats{width:calc(100vw - 96px)!important}
+ .workspace #viewport-1-winner-stats .stats-summary>div{padding:0 8px}
+ .workspace #viewport-1-winner-stats .stats-summary strong{font-size:16px;letter-spacing:-.3px}
+ .workspace #viewport-1-winner-stats .stats-summary small{font-size:10px}
+ .workspace #viewport-1-winner-stats .stats-controls{align-items:stretch;flex-direction:column}
+ .workspace #viewport-1-winner-stats .stats-controls>div{justify-content:space-between}
+ .workspace #viewport-1-winner-stats .chart-card{padding:12px 8px}
+ .workspace .chart-layout{grid-template-columns:30px minmax(0,1fr);gap:6px}
+ .workspace #chart{gap:5px}.workspace #chart .bar-column>span{font-size:8px}
+ .workspace #chart-unit{display:none}
+}
+
+/* Fit every bucket in the available plot width instead of creating nested scrollbars. */
+.workspace #chart{min-width:0;overflow:visible;gap:clamp(2px,1vw,10px)}
+.workspace #chart.dense-chart{gap:2px}
+.workspace #chart .bar-column{flex:1 1 0;width:0;min-width:0;max-width:100%;height:204px}
+.workspace #chart .bar-track{width:100%;min-width:0}
+.workspace #chart .bar-column>span{display:block;min-height:16px;line-height:16px;max-width:100%;font-variant-numeric:tabular-nums}
+.workspace #chart.dense-chart .bar-column>span{position:relative;align-self:center;width:32px;max-width:none}
+.workspace #chart.dense-chart .bar-column:first-child>span{align-self:flex-start;text-align:left}
+.workspace #chart.dense-chart .bar-column:last-child>span{align-self:flex-end;text-align:right}
+.workspace .streak-summary{display:grid;grid-template-columns:1fr 1fr;background:#ffffff0c;border:1px solid #ffffff0b;border-radius:12px;padding:16px 0}
+.workspace .streak-summary>div{text-align:center;padding:0 12px}
+.workspace .streak-summary>div+div{border-left:1px solid #ffffff15}
+.workspace .streak-summary small{display:block;font-size:12px;color:#d1d5dc}
+.workspace .streak-summary strong{display:block;font-size:23px;font-weight:500;line-height:1.3;margin-top:6px;color:#f4a58c;font-variant-numeric:tabular-nums}
+.workspace #current-period{white-space:nowrap}
+.workspace #current-period:disabled{opacity:.5;cursor:default}
+@media(max-width:600px){.workspace .streak-summary strong{font-size:20px}.workspace .streak-summary small{font-size:11px}.workspace #chart{gap:4px}.workspace #chart.dense-chart{gap:2px}}
+@media(max-width:600px){.workspace #chart.dense-chart .bar-column>span{width:24px}}
+.workspace #chart.dense-chart .bar-column>span:empty{width:0}
+
+/* More compact statistics without scaling down click targets. */
+.workspace #workspace-ui>#viewport-1-winner-stats{width:500px!important}
+.workspace #workspace-ui>#viewport-1-winner-stats>:not(.window-handle):not(.sr-only):not(.info-popover){margin:12px 16px}
+.workspace #viewport-1-winner-stats>.window-handle{min-height:44px}
+.workspace #viewport-1-winner-stats h2{font-size:13px}
+.workspace #viewport-1-winner-stats .periods button{font-size:10px;padding:6px 10px}
+.workspace #viewport-1-winner-stats .streak-summary{padding:12px 0}
+.workspace #viewport-1-winner-stats .streak-summary small{font-size:11px}
+.workspace #viewport-1-winner-stats .streak-summary strong{font-size:20px;margin-top:4px}
+.workspace #viewport-1-winner-stats .stats-summary{padding:12px 0}
+.workspace #viewport-1-winner-stats .stats-summary strong{font-size:20px;margin-top:4px}
+.workspace #viewport-1-winner-stats .stats-summary small{font-size:10px}
+.workspace #viewport-1-winner-stats .stats-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+.workspace #viewport-1-winner-stats .stats-controls>div{gap:6px;justify-content:flex-start}
+.workspace #viewport-1-winner-stats #period-label{font-size:11px}
+.workspace #viewport-1-winner-stats #stats-room{width:126px;font-size:10px;padding:8px}
+.workspace #viewport-1-winner-stats .stats-controls button{font-size:11px;padding:5px 8px}
+.workspace #viewport-1-winner-stats .chart-card{padding:12px}
+.workspace #viewport-1-winner-stats .chart-heading{font-size:11px;margin-bottom:14px}
+.workspace #viewport-1-winner-stats #chart-unit{font-size:10px}
+.workspace #viewport-1-winner-stats #chart-scale{height:140px;font-size:9px}
+.workspace #viewport-1-winner-stats #chart{height:164px;background:repeating-linear-gradient(to top,transparent 0,transparent 34px,#ffffff0b 34px,#ffffff0b 35px);background-size:100% 140px;background-repeat:no-repeat}
+.workspace #viewport-1-winner-stats #chart .bar-column{height:164px}
+.workspace #viewport-1-winner-stats #chart .bar-track{height:140px}
+.workspace #viewport-1-winner-stats #chart .bar-column>span{font-size:9px}
+.workspace #viewport-1-winner-stats #empty-stats{font-size:11px;margin-top:10px}
+.workspace #viewport-1-winner-stats .stats-footer button{font-size:10px}
+@media(max-width:600px){
+ .workspace #workspace-ui>#viewport-1-winner-stats{width:calc(100vw - 96px)!important}
+ .workspace #workspace-ui>#viewport-1-winner-stats>:not(.window-handle):not(.sr-only):not(.info-popover){margin:10px 12px}
+ .workspace #viewport-1-winner-stats .stats-controls{grid-template-columns:1fr}
+ .workspace #viewport-1-winner-stats .stats-summary>div{padding:0 6px}
+ .workspace #viewport-1-winner-stats .stats-summary strong{font-size:16px}
+ .workspace #viewport-1-winner-stats #chart .bar-column>span{font-size:8px}
+}
+.workspace #viewport-1-winner-stats #chart .bar-column:first-child>span:not(:empty){align-self:flex-start;width:max-content;max-width:none;text-align:left}
+.workspace #viewport-1-winner-stats #chart .bar-column:last-child>span:not(:empty){align-self:flex-end;width:max-content;max-width:none;text-align:right}
+
+/* Periods are controlled by the tabs; the only secondary filter is the room. */
+.workspace #viewport-1-winner-stats .stats-controls{display:flex;justify-content:flex-end;align-items:center}
+.workspace #viewport-1-winner-stats #stats-room{width:126px;cursor:pointer}
+@media(max-width:600px){.workspace #viewport-1-winner-stats .stats-controls{flex-direction:row}}
+
+/* Two lightweight menus below the streak summary. */
+.workspace #viewport-1-winner-stats .stats-controls{justify-content:space-between;gap:16px;border-top:1px solid var(--ui-separator);padding-top:12px}
+.workspace #viewport-1-winner-stats :is(#stats-period,#stats-room){appearance:none;width:auto;max-width:55%;min-height:36px;padding:7px 25px 7px 0;border:0;border-radius:6px;background-color:transparent;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23cdd2db' stroke-width='1.5'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;color:#e3e6eb;font-size:12px;font-weight:500;cursor:pointer}
+.workspace #viewport-1-winner-stats :is(#stats-period,#stats-room):hover{background-color:#ffffff08}
+.workspace #viewport-1-winner-stats :is(#stats-period,#stats-room) option{background:#292d34;color:#e3e6eb;font-weight:400}
+
+body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus{outline:none!important}
+.workspace #timer-config .alarm-settings{margin:18px 0 0;padding:14px 0 0;border:0;border-top:1px solid var(--ui-separator);min-width:0}
+.workspace #timer-config .alarm-settings legend{padding:0 8px 0 0;font-size:12px;font-weight:600}
+.workspace #timer-config .alarm-settings select{width:155px;font-size:12px;padding:7px}
+.workspace #timer-config .alarm-volume{display:flex;align-items:center;gap:8px;width:155px}
+.workspace #timer-config .alarm-volume input{max-width:none;width:100%;padding:0!important}
+.workspace #timer-config .alarm-volume output{min-width:32px;font-size:11px;text-align:right}
+.workspace #timer-config .alarm-settings button{font-size:12px;padding:7px 12px}
+.workspace #timer-config .alarm-settings small{display:block;margin-top:10px;font-size:10px;line-height:1.5;color:var(--muted)}
+/* Let expanded settings contribute their real height and scroll inside the panel. */
+.workspace #workspace-ui>#viewport-1-winner-hero:has(#timer-config[open]){padding-bottom:0!important;overflow:auto}
+.workspace #viewport-1-winner-hero .timer-footer:has(#timer-config[open]){flex-wrap:wrap}
+.workspace #timer-config[open]{display:block;flex-basis:100%;order:2}
+.workspace #timer-config[open]>summary{position:absolute;right:0;top:0}
+.workspace #timer-config[open] #settings-form{position:static;order:2;flex-basis:100%;margin-top:4px;padding:12px;box-shadow:none}
+.workspace #viewport-1-winner-hero .timer-footer:has(#timer-config[open])>.mode-tabs{flex:0 0 calc(100% - 44px)}
+
+.workspace #viewport-1-winner-stats .room-menu-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:36px;padding:7px 8px;background:transparent;border:0;border-radius:8px;font-size:12px;font-weight:500;color:#e3e6eb}
+.workspace #viewport-1-winner-stats .room-menu-trigger:hover,.workspace #viewport-1-winner-stats .room-menu-trigger[aria-expanded=true]{background:#ffffff0d}
+.workspace .room-menu{position:fixed;inset:auto;margin:0;width:188px;max-width:calc(100vw - 16px);padding:6px;background:#30353dfc;border:1px solid #ffffff21;border-radius:12px;box-shadow:0 14px 40px #0006,0 2px 6px #0003;color:#e3e6eb}
+.workspace .room-menu:not(:popover-open){display:none!important}
+.workspace .room-menu button{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:38px;padding:9px 10px;border:0;border-radius:7px;background:transparent;font:400 12px/1.4 var(--ui-font);text-align:left;color:#e3e6eb}
+.workspace .room-menu button:hover,.workspace .room-menu button:focus{background:#ffffff10;outline:none}
+.workspace .room-menu button[aria-checked=true]{color:#bed5fa;background:#adcaff12}
+.workspace .room-menu .menu-check{visibility:hidden;font-size:14px}
+.workspace .room-menu button[aria-checked=true] .menu-check{visibility:visible}
+@media(pointer:coarse){.workspace .room-menu button{min-height:44px}}
+
+/* Timer preferences: two aligned groups and one final save action. */
+.workspace #timer-config #settings-form{padding:16px}
+.workspace #timer-config .duration-settings{border:0;padding:0;margin:0;min-width:0}
+.workspace #timer-config :is(.duration-settings,.alarm-settings) legend{font-size:12px;font-weight:600;color:#e5e8ed;margin-bottom:8px}
+.workspace #timer-config .duration-settings legend span{font-weight:400;color:var(--muted)}
+.workspace #timer-config :is(.duration-settings,.alarm-settings)>label{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:center;margin:0;min-height:44px;font-size:12px}
+.workspace #timer-config .duration-settings input{justify-self:end;width:76px;max-width:76px;text-align:center}
+.workspace #timer-config .alarm-settings{margin-top:16px;padding-top:12px}
+.workspace #timer-config .alarm-settings :is(select,.alarm-volume){width:150px;max-width:100%}
+.workspace #timer-config #preview-alarm{display:block;margin:8px 0 0 auto;min-height:32px;padding:6px 12px}
+.workspace #timer-config #settings-form>button.primary{margin:20px 0 0;width:100%;min-height:38px}
+@media(max-width:600px){.workspace #timer-config :is(.duration-settings,.alarm-settings)>label{grid-template-columns:minmax(0,1fr) 130px;gap:8px}.workspace #timer-config .alarm-settings :is(select,.alarm-volume){width:130px}}
+
+/* One shared select treatment across tools, preferences, and navigation. */
+.workspace .room-menu-trigger{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;max-width:100%;padding:7px 10px;border:1px solid #ffffff20;border-radius:10px;background:#22262e;color:#e3e6eb;font:400 12px/1.4 var(--ui-font);text-align:left}
+.workspace .room-menu-trigger>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace .room-menu-trigger>svg{flex:none;pointer-events:none}
+.workspace .room-menu-trigger:hover,.workspace .room-menu-trigger[aria-expanded=true]{background:#ffffff0d}
+.workspace .top-group .room-menu-trigger{font-size:12px;min-height:32px;border:0;background:transparent;padding:5px 7px}
+.workspace #timer-config .alarm-settings .room-menu-trigger{width:150px;margin:0;min-height:34px}
+.workspace .room-menu{max-height:calc(100dvh - 16px);overflow:auto}
+@media(max-width:600px){.workspace #timer-config .alarm-settings .room-menu-trigger{width:130px}}
+
+/* Resize handles stay anchored to the window, outside scrollable content. */
+.workspace .resize-grip{position:fixed;display:flex;align-items:center;justify-content:center;width:24px;height:24px;padding:3px;border:0;border-radius:4px;background:transparent;color:#aab2bf;cursor:nwse-resize;touch-action:none;pointer-events:auto}
+.workspace .resize-grip:hover{background:#ffffff15;color:#fff}
+.workspace .resize-grip:active{transform:none}
+.workspace.resizing-panel{user-select:none;cursor:nwse-resize}
+.workspace.resizing-panel iframe{pointer-events:none}
+.workspace #workspace-ui>#viewport-1-winner-player.user-sized:not([hidden]){display:flex!important;flex-direction:column;overflow:hidden}
+.workspace #viewport-1-winner-player.user-sized>.window-handle{flex-shrink:0}
+.workspace #workspace-ui>#viewport-1-winner-player.user-sized>header{flex-shrink:0;margin:10px 16px}
+.workspace #workspace-ui>#viewport-1-winner-player.user-sized>#media-container{flex:1;min-height:80px;margin:0 12px;display:flex;overflow:hidden;border-radius:12px}
+.workspace #viewport-1-winner-player.user-sized #media-container iframe{width:100%;height:100%;border:0}
+.workspace #viewport-1-winner-player.user-sized .media-empty{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.workspace #workspace-ui>#viewport-1-winner-player.user-sized>#media-form{flex-shrink:0;margin:10px 16px 20px}
+
+/* Keep playback unobstructed; reveal URL controls when interacting with the panel. */
+.workspace #workspace-ui>#viewport-1-winner-player>#media-container{margin:12px}
+.workspace #workspace-ui>#viewport-1-winner-player.has-media>#media-form{position:absolute;left:10px;right:10px;bottom:10px;z-index:4;display:flex;align-items:center;gap:8px;margin:0;padding:8px;background:#292d34f5;border:1px solid #ffffff15;border-radius:12px;box-shadow:0 6px 24px #0004;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity 160ms ease,transform 160ms ease}
+.workspace #workspace-ui>#viewport-1-winner-player.has-media:is(:hover,:focus-within)>#media-form{opacity:1;transform:translateY(0);pointer-events:auto}
+.workspace #media-form #media-url{flex:1;min-width:0}
+.workspace #media-form>button{flex-shrink:0}
+.workspace #media-form #remove-media{width:32px;height:36px;padding:0;border-radius:8px;font-size:20px;color:#cbd0d8;background:transparent;border:0}
+.workspace #media-form #remove-media:hover:not(:disabled){background:#ffffff12;color:#fff}
+@media(hover:none) and (pointer:coarse){
+ .workspace #workspace-ui>#viewport-1-winner-player.has-media>#media-form{position:static;opacity:1;transform:none;pointer-events:auto;margin:8px 12px 20px;box-shadow:none}
+}
+
+/* Media uses a compact title bar and edge-to-edge playback. */
+.workspace #workspace-ui>#viewport-1-winner-player{overflow:hidden}
+.workspace #viewport-1-winner-player>.window-handle{min-height:34px;height:34px;padding:2px 7px 2px 12px;gap:8px;font-size:11px;box-sizing:border-box}
+.workspace #viewport-1-winner-player>.window-handle .close-button{width:28px;height:28px;min-height:28px;flex-basis:28px;padding:5px}
+.workspace #viewport-1-winner-player>.window-handle .info-button{width:24px;height:24px;min-width:24px;flex-basis:24px;font-size:11px}
+.workspace #viewport-1-winner-player>.window-handle .drag-dots{font-size:17px}
+.workspace #workspace-ui>#viewport-1-winner-player>#media-container,.workspace #workspace-ui>#viewport-1-winner-player.user-sized>#media-container{margin:0;border:0;border-radius:0;width:100%;min-width:0}
+.workspace #viewport-1-winner-player #media-container iframe{display:block;border:0;border-radius:0;width:100%}
+.workspace #workspace-ui>#viewport-1-winner-player.has-media>#media-form{left:6px;right:6px;bottom:6px}
+
+.workspace #viewport-1-winner-stats .stats-summary.single-room{grid-template-columns:repeat(2,minmax(0,1fr))}
+.workspace #viewport-1-winner-stats .stats-summary.single-room>div{border-left:0}
+
+.workspace #viewport-1-winner-stats .stats-summary.single-room>div:not(:first-child):not([hidden]){border-left:1px solid #ffffff12}
+
+/* Quick notes: compact list, focused plain-text editor, local autosave. */
+.workspace #workspace-ui>#viewport-1-winner-notes{width:380px!important}
+.workspace #workspace-ui>#viewport-1-winner-notes>.notes-content{margin:14px}
+.workspace .notes-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.workspace .notes-toolbar input{flex:1;min-width:0;font-size:12px}
+.workspace .notes-toolbar button{white-space:nowrap;font-size:12px}
+.workspace #notes-list{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow:auto;scrollbar-width:thin}
+.workspace .note-item{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;padding:9px 10px;border-radius:9px}
+.workspace .note-item[aria-pressed=true]{background:#ffffff0a;border-color:#ffffff1b}
+.workspace .note-item strong,.workspace .note-item span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workspace .note-item strong{font-size:12px;font-weight:500}
+.workspace .note-item span{font-size:11px;color:var(--muted);margin-top:3px}
+.workspace #notes-empty{padding:12px 0;font-size:12px}
+.workspace #note-editor{margin-top:14px;border-top:1px solid var(--ui-separator);padding-top:14px}
+.workspace #note-title{font-size:14px;font-weight:600;background:transparent;border:0;padding:8px 0}
+.workspace #note-body{display:block;width:100%;min-height:170px;max-height:35vh;resize:vertical;border:0;border-radius:8px;background:#00000012;color:var(--text);padding:10px;font:13px/1.6 var(--ui-font);box-sizing:border-box;margin:8px 0 12px}
+.workspace #note-body:focus-visible{outline:2px solid #a8caff;outline-offset:2px}
+.workspace .note-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.workspace .note-actions button{font-size:11px;padding:6px 10px;background:transparent}
+.workspace #delete-note{margin-left:auto}
+.workspace #note-status{display:block;font-size:10px;color:var(--muted);margin-top:10px;min-height:15px}
+.workspace #note-undo{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;font-size:12px}
+.workspace #note-undo button{font-size:12px}
+@media(max-width:600px){.workspace #workspace-ui>#viewport-1-winner-notes{width:calc(100vw - 96px)!important}.workspace #workspace-ui>#viewport-1-winner-notes>.notes-content{margin:12px}.workspace #note-body{min-height:140px}}
+
+/* Shared compact title bar for every floating tool. */
+.workspace #workspace-ui>.floating-panel>.window-handle{min-height:34px;height:34px;padding:2px 7px 2px 12px;gap:8px;font-size:11px;box-sizing:border-box}
+.workspace #workspace-ui>.floating-panel>.window-handle .close-button{width:28px;height:28px;min-height:28px;flex-basis:28px;padding:5px}
+.workspace #workspace-ui>.floating-panel>.window-handle .info-button{width:24px;height:24px;min-width:24px;flex-basis:24px;font-size:11px}
+.workspace #workspace-ui>.floating-panel>.window-handle .drag-dots{font-size:17px}

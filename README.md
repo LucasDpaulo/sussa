@@ -18,6 +18,7 @@ Abra **http://127.0.0.1:5173**. Use sempre a mesma origem e perfil do navegador 
 - Iniciar, pausar e reiniciar. O foco já realizado continua registrado mesmo ao reiniciar.
 - Salas Estudos e Trabalho: trocar de sala durante uma sessão passa a contabilizar o próximo intervalo na nova sala.
 - Tarefas diárias separadas por sala, com conclusão local.
+- Notas rápidas compartilhadas entre salas: título e texto, salvamento automático local, busca por título/conteúdo, fixação, exclusão com desfazer enquanto a página permanece aberta e download em `.txt`. As notas também entram na exportação JSON.
 - Estatísticas de dia, semana (segunda a domingo), mês e ano, com navegação entre períodos e filtro por sala. Somente foco entra no total.
 - Mixer com volume geral, chuva, oceano, lareira e tons estéreo Delta/Theta sintetizados via Web Audio. Arquivos locais podem fornecer café, teclado ou outros sons.
 - Player por URL para YouTube, Spotify e Apple Music. Disponibilidade, duração da reprodução e login dependem de cada serviço. O mixer controla apenas sons locais; cada player tem seu volume.
@@ -67,6 +68,7 @@ Testes da contagem de foco, troca de sala, exclusão de pausas, limites de perí
 - `src/workspace.js`, `src/workspace.css`: janelas móveis, ambientes e ocultação automática.
 - `src/core.js`: cronômetro e agregação do histórico.
 - `src/audio.js`: mixer de áudio sintetizado.
+- `src/notes.js`: painel de notas com persistência local e busca.
 - `src/calendar.js`: autorização Google e consulta somente de leitura.
 - `server.mjs`: servidor vinculado apenas a `127.0.0.1`.
 
@@ -77,4 +79,10 @@ Não há publicação externa. O aplicativo usa internet para players, Google Ag
 - `main`: versão de referência do projeto.
 - `dev`: desenvolvimento e próximas alterações.
 
-Pendências: validar reprodução de vídeos de fundo com arquivos reais e concluir a configuração/autorização da conta Google.
+Prioridade atual: consolidar as ferramentas básicas — cronômetro, tarefas por sala, estatísticas, sons e persistência local. Vídeos e Google Agenda ficam fora do escopo desta etapa.
+
+Revisão de 12/11/2026: fluxo de ajustar tempos, iniciar/pausar/reiniciar, concluir tarefas, trocar de sala e recarregar validado em Chrome isolado. Corrigidos o silenciamento durante operações do cronômetro e a aplicação dos volumes salvos ao iniciar uma sessão. Testes automatizados cobrem também a preservação do silêncio ao alterar volume e disparar o alarme.
+
+Refinamento da interface: fonte nativa do sistema (SF nos dispositivos Apple), ícones vetoriais consistentes, estados de hover/pressionamento e cantos padronizados. Painéis abrem em 220 ms e fecham em 160 ms; esses tempos são escolhas do projeto, não valores prescritos pela Apple. O X oculta a ferramenta sem interromper o cronômetro ou os sons. Escape fecha o painel superior; diálogos também fecham ao clicar fora. O foco volta ao controle de origem e a preferência de movimento reduzido elimina as animações. Fechamento, cliques rápidos e movimento reduzido foram verificados em Chrome isolado, com inspeção visual em 1280 e 390 px.
+
+Referências: Apple HIG — [Typography](https://developer.apple.com/design/human-interface-guidelines/typography), [Layout](https://developer.apple.com/design/human-interface-guidelines/layout), [Popovers](https://developer.apple.com/design/human-interface-guidelines/popovers) e [Materials](https://developer.apple.com/design/human-interface-guidelines/materials). A interface adapta esses princípios para a web; os painéis móveis são ferramentas persistentes, não popovers transitórios.
