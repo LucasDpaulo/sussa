@@ -1,0 +1,71 @@
+{
+  "assets": [
+    {
+      "file": "audio/lofi.mp3",
+      "title": "Comfy",
+      "author": "Purrple Cat",
+      "source": "https://freelofi.com/track/comfy",
+      "download": "https://purrplecat-audio.pages.dev/audio/sleep-tight/01-comfy.mp3",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "changes": "MP3 transcodificado a 160 kbps"
+    },
+    {
+      "file": "audio/jazz.mp3",
+      "title": "Jazz Brunch",
+      "author": "Kevin MacLeod (incompetech.com)",
+      "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1700074",
+      "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Jazz%20Brunch.mp3",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "changes": "MP3 transcodificado a 160 kbps"
+    },
+    {
+      "file": "audio/rain.mp3",
+      "title": "20170629 binaural: rainfall.wav",
+      "author": "chromakei",
+      "source": "https://freesound.org/people/chromakei/sounds/396578/",
+      "download": "https://cdn.freesound.org/previews/396/396578_7553603-hq.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "changes": "Derivado da prévia HQ MP3; trecho de 65s, com sobreposição de 5s para loop de 60s; estéreo preservado."
+    },
+    {
+      "files": [
+        "scenes/library.webp",
+        "scenes/library.mp4"
+      ],
+      "title": "People Studying Inside The Library",
+      "author": "cottonbro studio",
+      "source": "https://www.pexels.com/video/people-studying-inside-the-library-6334252/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "changes": "Vídeo sem áudio, 1280px, 24fps, H.264; transição de 1s para loop. Imagem WebP extraída do vídeo."
+    },
+    {
+      "files": [
+        "scenes/office.webp",
+        "scenes/office.mp4"
+      ],
+      "title": "Person Working On a Laptop",
+      "author": "Cup of Couple",
+      "source": "https://www.pexels.com/video/person-working-on-a-laptop-8472464/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "changes": "Vídeo sem áudio, 1280px, 24fps, H.264; transição de 1s para loop. Imagem WebP extraída do vídeo."
+    },
+    {
+      "files": [
+        "scenes/beach.webp",
+        "scenes/beach.mp4"
+      ],
+      "title": "The sun sets over the ocean with waves",
+      "author": "Manoo Media",
+      "source": "https://www.pexels.com/video/the-sun-sets-over-the-ocean-with-waves-26310139/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "changes": "Vídeo sem áudio, 1280px, 24fps, H.264; transição de 1s para loop. Imagem WebP extraída do vídeo."
+    }
+  ],
+  "notes": "Arquivos incorporados aos ambientes do Meu Espaço; não disponibilizados como banco de mídia independente."
+}

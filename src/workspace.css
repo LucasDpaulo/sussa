@@ -445,3 +445,12 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 .workspace #workspace-ui>.floating-panel>.window-handle .close-button{width:28px;height:28px;min-height:28px;flex-basis:28px;padding:5px}
 .workspace #workspace-ui>.floating-panel>.window-handle .info-button{width:24px;height:24px;min-width:24px;flex-basis:24px;font-size:11px}
 .workspace #workspace-ui>.floating-panel>.window-handle .drag-dots{font-size:17px}
+
+/* Reuse the existing panel controls for offline scenes and mixes. */
+#viewport-1-winner-spaces .panel-content > label,
+#ambience-controls > label:not(.sound-row){display:block;margin:14px 0}
+#viewport-1-winner-spaces .panel-content > button{display:block;margin:8px 0;max-width:100%}
+#viewport-1-winner-spaces label > .room-menu-trigger,
+#ambience-controls label > .room-menu-trigger{display:block;width:100%;margin-top:6px;text-align:left}
+#scene-credit,#ambience-status,#ambience-controls details{font-size:12px;color:var(--muted);line-height:1.6}
+#ambience-controls input[type=checkbox],#still-scene{vertical-align:middle;margin-right:6px}

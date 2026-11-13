@@ -1,0 +1,38 @@
+name: Desktop packages
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Desktop smoke (Linux CI)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:desktop -- --no-sandbox
+      - name: Desktop smoke (Windows)
+        if: runner.os == 'Windows'
+        run: npm run test:desktop
+      - if: runner.os == 'Linux'
+        run: npm run pack:linux
+      - if: runner.os == 'Windows'
+        run: npm run pack:windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ runner.os }}
+          if-no-files-found: error
+          path: |
+            release/*.deb
+            release/*.AppImage
+            release/*.exe

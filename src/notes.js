@@ -7,7 +7,7 @@ export function initNotes({ state, save, canEdit }) {
   let active = state.notes[0]?.id || null, removed = null;
   const current = () => state.notes.find(note => note.id === active);
   const normalize = text => String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  function persist() { const ok=save(); $('#note-status').textContent=ok?'Salvo neste navegador':'Não foi possível salvar'; }
+  function persist() { const ok=save(); $('#note-status').textContent=ok?'Salvo neste dispositivo':'Não foi possível salvar'; }
   function renderList() {
     const query = normalize($('#notes-search').value);
     const notes = state.notes.filter(note=>normalize(`${note.title} ${note.body}`).includes(query))

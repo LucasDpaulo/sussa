@@ -71,7 +71,7 @@ export function initContextHelp() {
   let active = null;
   for (const [selector, title, selectors] of groups) {
     const host = document.querySelector(selector);
-    const notes = selectors.flatMap(s => [...host.querySelectorAll(s)]);
+    const notes = selectors.flatMap(s => [...host.querySelectorAll(s)]).filter(note => !note.id && !note.closest('#ambience-controls'));
     if (!notes.length) continue;
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'info-button'; button.textContent = 'i';
@@ -169,6 +169,7 @@ function enhanceSelect(select) {
   });
   menu.addEventListener('toggle',()=>trigger.setAttribute('aria-expanded',String(menu.matches(':popover-open'))));
   select.addEventListener('change',sync);
+  select.addEventListener('selection:sync',sync);
   select.form?.addEventListener('settings:open',sync);
   select.closest('dialog')?.addEventListener('close',close);
   window.addEventListener('resize',close);

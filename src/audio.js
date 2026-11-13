@@ -1,5 +1,5 @@
 export class Mixer {
-  constructor() { this.channels = {}; this.muted = false; this.volume = 60; }
+  constructor() { this.channels = {}; this.muted = false; this.volume = 60; this.pending = {}; this.levels = {}; }
   async start() {
     if (!this.ctx) {
       this.ctx = new AudioContext(); this.master = this.ctx.createGain(); this.master.connect(this.ctx.destination);
@@ -8,8 +8,18 @@ export class Mixer {
     await this.ctx.resume();
   }
   async set(name, volume) {
+    this.levels[name] = volume;
+    if (name !== 'master' && volume === 0 && !this.channels[name] && !this.pending[name]) return;
     await this.start();
     if (name === 'master') { this.volume = volume; this.master.gain.setTargetAtTime(this.muted ? 0 : volume / 100, this.ctx.currentTime, .1); return; }
+    if (name === 'rain') {
+      if (!this.channels.rain) {
+        this.pending.rain ??= this.loadRain().finally(() => { delete this.pending.rain; });
+        await this.pending.rain;
+      }
+      this.channels.rain.gain.setTargetAtTime(this.levels.rain / 100, this.ctx.currentTime, .3);
+      return;
+    }
     if (!this.channels[name]) {
       const gain = this.ctx.createGain(); gain.gain.value = 0; gain.connect(this.master);
       if (name === 'delta' || name === 'theta') {
@@ -28,6 +38,27 @@ export class Mixer {
     }
     this.channels[name].gain.setTargetAtTime(volume / 100 * (['delta','theta'].includes(name) ? .12 : .7), this.ctx.currentTime, .1);
   }
+  async loadRain() {
+    const response = await fetch('/assets/audio/rain.mp3');
+    if (!response.ok) throw new Error('Chuva local indisponível');
+    const buffer = await this.ctx.decodeAudioData(await response.arrayBuffer());
+    const gain = this.ctx.createGain(); gain.gain.value = 0; gain.connect(this.master);
+    const source = this.ctx.createBufferSource(); source.buffer = buffer; source.loop = true;
+    source.connect(gain); source.start(); this.channels.rain = gain;
+  }
+  async attachMusic(audio) {
+    await this.start();
+    if (this.music) return;
+    this.music = this.ctx.createGain(); this.music.gain.value = 0;
+    this.musicPan = this.ctx.createStereoPanner();
+    this.musicDepth = this.ctx.createGain(); this.musicDepth.gain.value = 0;
+    this.musicLfo = this.ctx.createOscillator(); this.musicLfo.frequency.value = 1 / 24;
+    this.musicLfo.connect(this.musicDepth); this.musicDepth.connect(this.musicPan.pan); this.musicLfo.start();
+    this.ctx.createMediaElementSource(audio).connect(this.musicPan);
+    this.musicPan.connect(this.music); this.music.connect(this.master);
+  }
+  setMusicVolume(value) { this.music?.gain.setTargetAtTime(value / 100, this.ctx.currentTime, .25); }
+  setSpatial(enabled) { this.musicDepth?.gain.setTargetAtTime(enabled ? .35 : 0, this.ctx.currentTime, .5); }
   async alarm({ sound = 'bell', volume = 70 } = {}) {
     if (sound === 'none' || volume <= 0) return;
     await this.start();

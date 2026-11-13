@@ -1,7 +1,58 @@
 {
   "name": "meu-espaco-pomodoro",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "node server.mjs", "start": "node server.mjs", "test": "node --test" }
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "test": "node --test",
+    "desktop": "electron .",
+    "pack:linux": "electron-builder --linux AppImage deb --publish never",
+    "pack:windows": "electron-builder --win nsis --publish never",
+    "test:desktop": "node scripts/desktop-smoke.mjs"
+  },
+  "main": "desktop/main.cjs",
+  "description": "Pomodoro local para estudos e trabalho",
+  "author": "LucasDpaulo",
+  "devDependencies": {
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "io.github.lucasdpaulo.meuespaco",
+    "productName": "Meu Espaço",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**",
+      "src/**",
+      "index.html",
+      "assets/forest-trail.webp",
+      "assets/surface-grain.svg",
+      "package.json",
+      "assets/design-1.png",
+      "assets/audio/**",
+      "assets/scenes/**",
+      "assets/media-credits.json"
+    ],
+    "linux": {
+      "category": "Office",
+      "executableName": "meu-espaco",
+      "maintainer": "LucasDpaulo",
+      "desktop": {
+        "entry": {
+          "NoDisplay": "true"
+        }
+      }
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
 }

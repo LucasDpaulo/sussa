@@ -1,3 +1,4 @@
+import { scenes, presets } from './ambience.js';
 import { embedUrl } from './core.js';
 import { transitionSurface, initDialogs, initContextHelp, initRoomMenu, icon } from './interface.js';
 
@@ -21,7 +22,7 @@ function assetStore(action, value) {
 
 export function initWorkspace({state, save, toast}) {
   document.body.classList.add('workspace');
-  const preferences = state.workspace = { autoHide:true, hideAfter:5, scene:'forest', videoUrl:'', backgroundVolume:0, positions:{}, sizes:{}, open:['hero'], ...state.workspace };
+  const preferences = state.workspace = { autoHide:true, hideAfter:5, scene:'forest', stillScene:false, videoUrl:'', backgroundVolume:0, positions:{}, sizes:{}, open:['hero'], ...state.workspace };
   preferences.sizes = preferences.sizes?.player ? { player: preferences.sizes.player } : {};
   preferences.hideAfter = Math.min(120, Math.max(2, Number(preferences.hideAfter) || 5));
   const root = $('#viewport-1-winner'); root.id = 'workspace-ui';
@@ -60,7 +61,7 @@ export function initWorkspace({state, save, toast}) {
   nav.innerHTML=Object.keys(labels).map(name=>`<button data-panel="${name}" aria-controls="viewport-1-winner-${name}" aria-expanded="false"><span>${icon(name)}</span>${labels[name]}</button>`).join('');
 
   const spaces=document.createElement('div');spaces.id='viewport-1-winner-spaces';
-  spaces.innerHTML=`<div class="panel-content"><h2>Seu ambiente</h2><p class="hint">Uma paisagem para acompanhar seu foco.</p><button id="forest-scene" class="scene-card"><img src="/assets/forest-trail.webp" alt="Trilha em uma floresta"><span>Trilha na floresta</span></button><button id="neutral-scene">Fundo neutro</button><hr><label class="file-label">Imagem ou vídeo do computador<input id="scene-file" type="file" accept="image/*,video/*"></label><p class="hint">O arquivo fica salvo somente neste navegador.</p><form id="scene-url-form"><label>Vídeo por link<input id="scene-url" type="url" placeholder="YouTube ou link direto MP4 / WebM" required></label><button>Usar vídeo</button></form><p id="scene-status" role="status"></p><div class="scene-controls"><button id="scene-play">Pausar vídeo</button><label>Áudio do vídeo<input id="scene-volume" type="range" min="0" max="100" value="${preferences.backgroundVolume}"></label></div><p class="hint">Vídeos do YouTube ficam sem áudio neste fundo. Para ouvir música, use Mídia.</p><small>Foto: <a href="https://unsplash.com/photos/a-dirt-path-in-the-middle-of-a-forest-GJJdGDsoomU" target="_blank" rel="noopener">Anton Sobotyak / Unsplash ↗</a></small></div>`;
+  spaces.innerHTML=`<div class="panel-content"><h2>Seu ambiente</h2><p class="hint">Escolha a paisagem ou aplique uma combinação de imagem e som.</p><label>Combinações prontas<select id="ambience-preset">${Object.entries(presets).map(([id,p])=>`<option value="${id}">${p.title}</option>`).join('')}</select></label><button id="apply-ambience">Aplicar combinação</button><button id="save-ambience">Salvar minha combinação</button><button id="restore-ambience">Usar minha combinação</button><p class="hint">Combinações iniciam o som e ajustam os volumes. O silêncio geral é respeitado.</p><label>Cenários offline<select id="catalog-scene"><option value="">Escolha uma imagem</option>${scenes.map(s=>`<option value="${s.id}">${s.title}</option>`).join('')}</select></label><label><input id="still-scene" type="checkbox" ${preferences.stillScene?'checked':''}> Usar imagem parada (economizar bateria)</label><p id="scene-credit"></p><button id="forest-scene" class="scene-card"><img src="/assets/forest-trail.webp" alt="Trilha em uma floresta"><span>Trilha na floresta</span></button><button id="neutral-scene">Fundo neutro</button><hr><label class="file-label">Imagem ou vídeo do computador<input id="scene-file" type="file" accept="image/*,video/*"></label><p class="hint">O arquivo fica salvo somente neste dispositivo.</p><form id="scene-url-form"><label>Vídeo por link<input id="scene-url" type="url" placeholder="YouTube ou link direto MP4 / WebM" required></label><button>Usar vídeo</button></form><p id="scene-status" role="status"></p><div class="scene-controls"><button id="scene-play">Pausar vídeo</button><label>Áudio do vídeo<input id="scene-volume" type="range" min="0" max="100" value="${preferences.backgroundVolume}"></label></div><p class="hint">Vídeos do YouTube ficam sem áudio neste fundo. Para ouvir música, use Mídia.</p><small>Foto: <a href="https://unsplash.com/photos/a-dirt-path-in-the-middle-of-a-forest-GJJdGDsoomU" target="_blank" rel="noopener">Anton Sobotyak / Unsplash ↗</a></small></div>`;
   root.append(spaces);
   $('#scene-url').value=preferences.videoUrl;
   const settings=$('#settings');
@@ -175,12 +176,20 @@ export function initWorkspace({state, save, toast}) {
   window.addEventListener('resize',()=>{for(const panel of panelMap.values()){clampPanel(panel);if(panel.classList.contains('user-sized'))resizePanel(panel,panel.offsetWidth,panel.offsetHeight);positionGrip(panel);}});
 
   const video=$('#scene-video'),image=$('#scene-image'),youtube=$('#scene-youtube');
-  function clearScene(){video.pause();video.removeAttribute('src');video.load();video.hidden=true;youtube.hidden=true;youtube.replaceChildren();image.hidden=false;image.style.backgroundImage='';image.classList.remove('neutral');if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null;}}
-  function controls(){const isVideo=preferences.scene==='file-video'||preferences.scene==='video-url';$('.scene-controls').hidden=!isVideo;$('#scene-play').textContent=video.paused?'Reproduzir vídeo':'Pausar vídeo';}
+  function clearScene(){video.pause();video.removeAttribute('src');video.removeAttribute('poster');video.load();video.hidden=true;youtube.hidden=true;youtube.replaceChildren();image.hidden=false;image.style.backgroundImage='';image.classList.remove('neutral');if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null;}}
+  function controls(){const isVideo=preferences.scene==='file-video'||preferences.scene==='video-url'||(scenes.some(s=>s.id===preferences.scene)&&!preferences.stillScene);$('.scene-controls').hidden=!isVideo;$('#scene-play').textContent=video.paused?'Reproduzir vídeo':'Pausar vídeo';}
   async function applyScene(){
     const revision=++sceneRevision;clearScene();$('#scene-status').textContent='';
     try{
-      if(preferences.scene==='neutral')image.classList.add('neutral');
+      const bundled = scenes.find(s => s.id === preferences.scene);
+      $('#catalog-scene').value = bundled?.id || '';
+      $('#catalog-scene').dispatchEvent(new Event('selection:sync'));
+      $('#scene-credit').textContent = bundled?.credit || '';
+      if (bundled) {
+        image.style.backgroundImage = `url("${bundled.image}")`;
+        if (!preferences.stillScene) { video.src = bundled.video; video.poster = bundled.image; video.hidden = false; }
+      }
+      else if(preferences.scene==='neutral')image.classList.add('neutral');
       else if(preferences.scene==='file-image'||preferences.scene==='file-video'){
         const file=await assetStore('get');if(revision!==sceneRevision)return;if(!file)throw new Error('Escolha o arquivo de fundo novamente.');
         objectUrl=URL.createObjectURL(file);
@@ -197,6 +206,11 @@ export function initWorkspace({state, save, toast}) {
     if(revision===sceneRevision)controls();
   }
   video.addEventListener('error',()=>{if(!video.hidden){image.hidden=false;video.hidden=true;$('#scene-status').textContent='Não foi possível reproduzir este vídeo. Tente MP4/WebM compatível ou outro arquivo.';controls();}});
+  $('#still-scene').onchange = e => { preferences.stillScene = e.target.checked; save(); applyScene(); };
+  $('#save-ambience').onclick = () => { state.ambience.saved = { scene: preferences.scene, track: state.ambience.track, music: state.ambience.volume, rain: state.volumes.rain, volumes: { ...state.volumes }, spatial: state.ambience.spatial, stillScene: preferences.stillScene, videoUrl: preferences.videoUrl, backgroundVolume: preferences.backgroundVolume }; save(); toast('Combinação salva neste dispositivo.'); };
+  $('#restore-ambience').onclick = () => { const saved = state.ambience.saved; if (!saved) return toast('Salve uma combinação primeiro.'); preferences.scene = saved.scene; preferences.stillScene = saved.stillScene; preferences.videoUrl = saved.videoUrl; preferences.backgroundVolume = saved.backgroundVolume; $('#still-scene').checked = preferences.stillScene; $('#scene-volume').value = preferences.backgroundVolume; $('#scene-url').value = preferences.videoUrl; save(); applyScene(); document.dispatchEvent(new CustomEvent('ambience:preset', { detail: 'saved' })); };
+  $('#catalog-scene').onchange = e => { if (!scenes.some(s => s.id === e.target.value)) return; preferences.scene = e.target.value; save(); applyScene(); };
+  $('#apply-ambience').onclick = () => { const id = $('#ambience-preset').value; preferences.scene = presets[id].scene; preferences.backgroundVolume = 0; $('#scene-volume').value = 0; save(); applyScene(); document.dispatchEvent(new CustomEvent('ambience:preset', { detail: id })); };
   $('#forest-scene').onclick=()=>{preferences.scene='forest';save();applyScene();};
   $('#neutral-scene').onclick=()=>{preferences.scene='neutral';save();applyScene();};
   $('#scene-file').onchange=async e=>{
