@@ -1,0 +1,2 @@
+# O install.sh roda via "curl | bash"; com CRLF o bash quebra.
+*.sh text eol=lf

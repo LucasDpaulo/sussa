@@ -14,4 +14,4 @@ http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': types[extname(file)], 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin' });
     res.end(content);
   } catch { res.writeHead(404).end('Não encontrado'); }
-}).listen(5173, '127.0.0.1', () => console.log('Pomodoro: http://127.0.0.1:5173'));
+}).listen(5173, '127.0.0.1', () => console.log('Sussa: http://127.0.0.1:5173'));

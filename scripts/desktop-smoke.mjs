@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import electron from 'electron';
-const directory = mkdtempSync(join(tmpdir(), 'pomodoro-desktop-'));
+const directory = mkdtempSync(join(tmpdir(), 'sussa-desktop-'));
 try {
   for (const args of [['--write'], []]) {
     const testFlags = process.argv.includes('--no-sandbox') ? ['--no-sandbox'] : [];

@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 const { openStore } = createRequire(import.meta.url)('../desktop/store.cjs');
 
 test('desktop preserves state after reopening and rejects invalid writes', () => {
-  const directory = mkdtempSync(join(tmpdir(), 'pomodoro-store-'));
+  const directory = mkdtempSync(join(tmpdir(), 'sussa-store-'));
   let store;
   try {
     const file = join(directory, 'workspace.sqlite');

@@ -1,5 +1,5 @@
 {
-  "name": "meu-espaco-pomodoro",
+  "name": "sussa",
   "version": "0.2.0",
   "private": true,
   "type": "module",
@@ -20,8 +20,8 @@
     "electron-builder": "26.18.0"
   },
   "build": {
-    "appId": "io.github.lucasdpaulo.meuespaco",
-    "productName": "Meu Espaço",
+    "appId": "io.github.lucasdpaulo.sussa",
+    "productName": "Sussa",
     "directories": {
       "output": "release"
     },
@@ -37,9 +37,12 @@
       "assets/scenes/**",
       "assets/media-credits.json"
     ],
+    "appImage": {
+      "artifactName": "sussa-${version}-${arch}.${ext}"
+    },
     "linux": {
       "category": "Office",
-      "executableName": "meu-espaco",
+      "executableName": "sussa",
       "maintainer": "LucasDpaulo",
       "desktop": {
         "entry": {
@@ -51,6 +54,7 @@
       "target": "nsis"
     },
     "nsis": {
+      "artifactName": "sussa-setup-${version}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }

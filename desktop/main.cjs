@@ -7,7 +7,7 @@ const origin = 'app://workspace';
 const root = path.resolve(__dirname, '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 // A stable directory preserves data when the application is updated.
-app.setPath('userData', path.join(app.getPath('appData'), 'meu-espaco'));
+app.setPath('userData', path.join(app.getPath('appData'), 'sussa'));
 let window, store;
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -35,7 +35,7 @@ else {
       try { if (!trusted(event)) throw new Error('Acesso inválido'); store.setItem(key, value); event.returnValue = { ok: true }; }
       catch { event.returnValue = { error: 'Não foi possível salvar os dados locais' }; }
     });
-    window = new BrowserWindow({ width: 1280, height: 850, minWidth: 390, minHeight: 600, title: 'Meu Espaço', backgroundColor: '#191c22', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
+    window = new BrowserWindow({ width: 1280, height: 850, minWidth: 390, minHeight: 600, title: 'Sussa', backgroundColor: '#191c22', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
     window.webContents.on('will-navigate', event => event.preventDefault());
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.session.setPermissionRequestHandler((contents, permission, callback) => callback(contents === window.webContents && permission === 'notifications'));
