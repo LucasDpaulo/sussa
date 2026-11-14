@@ -3,12 +3,14 @@ require('../desktop/main.cjs');
 const timeout = setTimeout(() => { console.error('Desktop smoke timed out'); app.exit(1); }, 40000);
 app.whenReady().then(async () => {
   try {
-    let window;
-    for (let i = 0; i < 100; i++) {
+    let window, ready = false;
+    for (let i = 0; i < 100 && !ready; i++) {
       window = BrowserWindow.getAllWindows()[0];
-      if (window && await window.webContents.executeJavaScript("!!document.querySelector('#toggle-timer') && !!window.desktopStorage").catch(() => false)) break;
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Espera o app obter a trava de escrita (navigator.locks); antes disso os cliques são ignorados.
+      ready = !!window && await window.webContents.executeJavaScript("document.body.dataset.ready === 'true' && !!window.desktopStorage").catch(() => false);
+      if (!ready) await new Promise(resolve => setTimeout(resolve, 100));
     }
+    if (!ready) throw new Error('App did not become ready (writer lock not acquired)');
     const result = await window.webContents.executeJavaScript(`(async () => {
       const key = 'meu-espaco-v1';
       if (typeof require !== 'undefined') throw new Error('Node leaked into renderer');
@@ -43,7 +45,7 @@ app.whenReady().then(async () => {
       }
       const state = JSON.parse(window.desktopStorage.getItem(key));
       if (!state.tasks.some(task => task.title === 'Desktop smoke task')) throw new Error('Task not persisted');
-      if (!state.running || state.remaining >= state.durations.focus * 60000) throw new Error('Timer did not advance');
+      if (!state.running || state.remaining >= state.durations.focus * 60000) throw new Error('Timer did not advance: ' + JSON.stringify({running: state.running, remaining: state.remaining, mode: state.mode}));
       if (state.ambience?.saved?.track !== 'jazz' || state.workspace.scene !== 'library') throw new Error('Combination not persisted');
       if (!document.querySelector('#clock').textContent) throw new Error('Clock missing');
       return 'Task and running timer persisted; isolated storage bridge working';

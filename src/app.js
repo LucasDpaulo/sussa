@@ -183,7 +183,7 @@ initWorkspace({state, save, toast});
 // Keep pointer clicks quiet visually while preserving keyboard focus indicators.
 document.addEventListener('pointerdown',()=>{document.body.dataset.inputMode='pointer';},true);
 document.addEventListener('keydown',()=>{document.body.dataset.inputMode='keyboard';},true);
-function start(){owned=true;tick();renderTasks();renderCalendar();renderMedia();renderStats();setInterval(tick,1000);}
+function start(){owned=true;tick();renderTasks();renderCalendar();renderMedia();renderStats();setInterval(tick,1000);document.body.dataset.ready="true";}
 if(navigator.locks)navigator.locks.request('sussa-writer',{ifAvailable:true},async lock=>{if(!lock){toast('Outra aba está aberta. Use apenas uma aba para registrar seu foco.');document.body.classList.add('read-only');updateTimer();renderTasks();renderMedia();renderStats();$$('button,input,select,textarea').forEach(el=>el.disabled=true);return;}start();await new Promise(()=>{});});else start();
 document.addEventListener('visibilitychange',()=>{if(owned)tick();});
 window.addEventListener('pagehide',()=>{if(owned){advance(state);save();}});
