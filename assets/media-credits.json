@@ -29,42 +29,6 @@
       "license": "CC0 1.0",
       "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
       "changes": "Derivado da prévia HQ MP3; trecho de 65s, com sobreposição de 5s para loop de 60s; estéreo preservado."
-    },
-    {
-      "files": [
-        "scenes/library.webp",
-        "scenes/library.mp4"
-      ],
-      "title": "People Studying Inside The Library",
-      "author": "cottonbro studio",
-      "source": "https://www.pexels.com/video/people-studying-inside-the-library-6334252/",
-      "license": "Pexels License",
-      "licenseUrl": "https://www.pexels.com/license/",
-      "changes": "Vídeo sem áudio, 1280px, 24fps, H.264; transição de 1s para loop. Imagem WebP extraída do vídeo."
-    },
-    {
-      "files": [
-        "scenes/office.webp",
-        "scenes/office.mp4"
-      ],
-      "title": "Person Working On a Laptop",
-      "author": "Cup of Couple",
-      "source": "https://www.pexels.com/video/person-working-on-a-laptop-8472464/",
-      "license": "Pexels License",
-      "licenseUrl": "https://www.pexels.com/license/",
-      "changes": "Vídeo sem áudio, 1280px, 24fps, H.264; transição de 1s para loop. Imagem WebP extraída do vídeo."
-    },
-    {
-      "files": [
-        "scenes/beach.webp",
-        "scenes/beach.mp4"
-      ],
-      "title": "The sun sets over the ocean with waves",
-      "author": "Manoo Media",
-      "source": "https://www.pexels.com/video/the-sun-sets-over-the-ocean-with-waves-26310139/",
-      "license": "Pexels License",
-      "licenseUrl": "https://www.pexels.com/license/",
-      "changes": "Vídeo sem áudio, 1280px, 24fps, H.264; transição de 1s para loop. Imagem WebP extraída do vídeo."
     }
   ],
   "notes": "Arquivos incorporados aos ambientes do Sussa; não disponibilizados como banco de mídia independente."

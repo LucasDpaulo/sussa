@@ -17,6 +17,11 @@ export function authorize(clientId) {
   });
 }
 export async function events(date, calendarId = 'primary') {
+  // No desktop, a conta Google fica no processo principal (⚙ Aparência → Conta Google).
+  if (window.desktopGoogle) {
+    try { return await window.desktopGoogle.calendar(date, calendarId); }
+    catch (error) { throw new Error(String(error.message).replace(/^Error invoking remote method '[^']+': (Error: )?/, '')); }
+  }
   if (!token || Date.now() >= expires) throw new Error('Conecte sua conta Google para carregar a agenda.');
   const start = new Date(`${date}T00:00:00`), end = new Date(start); end.setDate(end.getDate() + 1);
   const params = new URLSearchParams({ timeMin: start.toISOString(), timeMax: end.toISOString(), singleEvents: 'true', orderBy: 'startTime', maxResults: '250' });

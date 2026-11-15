@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Sussa: xícara de café vista de cima, com anel de progresso do Pomodoro em volta do pires. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#E0A86C"/>
+      <stop offset="1" stop-color="#A65F33"/>
+    </linearGradient>
+    <radialGradient id="bgGlow" cx="0.3" cy="0.18" r="0.75">
+      <stop offset="0" stop-color="#FFE7C2" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#FFE7C2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="saucer" cx="0.42" cy="0.36" r="0.7">
+      <stop offset="0" stop-color="#FFFBF5"/>
+      <stop offset="1" stop-color="#EBDCC8"/>
+    </radialGradient>
+    <radialGradient id="cup" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EFE4D6"/>
+    </radialGradient>
+    <radialGradient id="coffee" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7A4325"/>
+      <stop offset="0.78" stop-color="#5A2E17"/>
+      <stop offset="1" stop-color="#9A5A30"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="26" flood-color="#4A230F" flood-opacity="0.38"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#5A2E17" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- Fundo caramelo -->
+  <rect x="48" y="48" width="928" height="928" rx="212" fill="url(#bg)"/>
+  <rect x="48" y="48" width="928" height="928" rx="212" fill="url(#bgGlow)"/>
+
+  <!-- Pires -->
+  <circle cx="512" cy="520" r="352" fill="url(#saucer)" filter="url(#shadow)"/>
+
+  <!-- Anel do Pomodoro: trilho e progresso (~70%) a partir do topo, sentido horário -->
+  <circle cx="512" cy="520" r="314" fill="none" stroke="#E2CFB8" stroke-width="30"/>
+  <circle cx="512" cy="520" r="314" fill="none" stroke="#6E3A1E" stroke-width="30"
+          stroke-linecap="round" pathLength="100" stroke-dasharray="70 100"
+          transform="rotate(-90 512 520)"/>
+
+  <!-- Alça da xícara -->
+  <g filter="url(#softShadow)" transform="rotate(-32 512 520)">
+    <rect x="700" y="468" width="132" height="104" rx="52" fill="url(#cup)" stroke="#E0D0BC" stroke-width="6"/>
+    <rect x="740" y="500" width="62" height="40" rx="20" fill="#E5D2BB"/>
+  </g>
+
+  <!-- Xícara -->
+  <circle cx="512" cy="520" r="232" fill="url(#cup)" filter="url(#softShadow)"/>
+  <circle cx="512" cy="520" r="232" fill="none" stroke="#E3D3BF" stroke-width="5"/>
+
+  <!-- Café com crema -->
+  <circle cx="512" cy="520" r="190" fill="url(#coffee)"/>
+
+  <!-- Latte art: coração -->
+  <path d="M512 640
+           C 470 606, 404 566, 404 500
+           C 404 456, 438 428, 474 428
+           C 492 428, 506 438, 512 452
+           C 518 438, 532 428, 550 428
+           C 586 428, 620 456, 620 500
+           C 620 566, 554 606, 512 640 Z"
+        fill="#F4E4CC"/>
+  <!-- segunda camada da latte art, como num coração servido em camadas -->
+  <path d="M512 596
+           C 484 574, 446 548, 446 506
+           C 446 480, 466 464, 486 464
+           C 498 464, 507 470, 512 480
+           C 517 470, 526 464, 538 464
+           C 558 464, 578 480, 578 506
+           C 578 548, 540 574, 512 596 Z"
+        fill="#E6CBA8"/>
+
+  <!-- Brilho na borda da xícara -->
+  <path d="M352 390 A 232 232 0 0 1 470 296" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+</svg>

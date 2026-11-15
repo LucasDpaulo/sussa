@@ -73,17 +73,7 @@ body.workspace,html:has(body.workspace){height:100%;overflow:hidden;background:#
 .workspace-chrome,#workspace-ui{transition:opacity .3s}
 body.focus-hidden .workspace-chrome{opacity:0!important;pointer-events:none!important}
 body.focus-hidden .workspace-chrome *{pointer-events:none!important}
-#scene-url-form{display:block;margin-top:20px}
-#scene-url-form label{display:block;font-size:12px}
-#scene-url-form input{margin:8px 0;font-size:11px}
-#scene-url-form button{width:100%;font-size:12px}
-.scene-card{padding:0;overflow:hidden;width:100%;margin:14px 0 10px;border-radius:7px;text-align:left;border:1px solid #5a626e}
-.scene-card img{width:100%;height:140px;object-fit:cover}
-.scene-card span{display:block;padding:9px 12px;font-size:12px}
 #scene-status{font-size:12px;color:#f4b59f;margin-top:12px}
-.scene-controls{margin:15px 0}
-.scene-controls label{display:block;font-size:12px;margin-top:12px}
-.scene-controls input{display:block;width:100%;margin-top:9px}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap}
 .workspace #settings label{font-size:13px}
 .workspace #hide-after{max-width:80px}
@@ -454,3 +444,71 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 #ambience-controls label > .room-menu-trigger{display:block;width:100%;margin-top:6px;text-align:left}
 #scene-credit,#ambience-status,#ambience-controls details{font-size:12px;color:var(--muted);line-height:1.6}
 #ambience-controls input[type=checkbox],#still-scene{vertical-align:middle;margin-right:6px}
+/* Explorar YouTube */
+.workspace #youtube-catalog{width:min(980px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto}
+.workspace #open-youtube{width:100%;margin:4px 0 10px;min-height:40px}
+.workspace .yt-filters{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-bottom:14px}
+.workspace .yt-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:3px;border-radius:11px;background:#00000026}
+.workspace .yt-tabs[hidden]{display:none}
+.workspace .yt-tabs button{border:0;background:none;color:#c8cbd1;padding:6px 12px;border-radius:8px;font-size:13px;min-height:32px}
+.workspace .yt-tabs button:hover{background:var(--ui-hover);color:#fff}
+.workspace .yt-tabs button[aria-pressed=true]{background:#ffffff1f;color:#fff}
+.workspace #yt-status:empty{display:none}
+.workspace #yt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px 14px}
+.workspace .yt-card{display:flex;flex-direction:column;gap:6px;padding:0;border:0;background:none;color:#fff;text-align:left;cursor:pointer;min-width:0}
+.workspace .yt-card img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#ffffff0d;transition:transform .15s ease}
+.workspace .yt-card:hover img{transform:scale(1.02)}
+.workspace .yt-card.active img{outline:2px solid #f2b47c;outline-offset:2px}
+.workspace .yt-card.blocked{opacity:.4;cursor:not-allowed}
+.workspace .yt-title{font-size:13px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.workspace .yt-card small{font-size:12px;color:#a9adb5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:600px){.workspace #yt-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}.workspace .yt-filters{flex-direction:column}}
+/* Enquadramento do vídeo de fundo: "contain" mostra o vídeo inteiro, centralizado, sem cortar */
+#scene[data-fit=contain]{background:#08090b}
+#scene[data-fit=contain] #scene-video{object-fit:contain}
+/* Barra discreta do vídeo de fundo */
+#scene-bar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:2px;padding:4px 10px 4px 4px;border-radius:999px;background:#16191ecc;border:1px solid #ffffff14;backdrop-filter:blur(14px);box-shadow:0 6px 20px #0004;opacity:.55;transition:opacity .25s}
+#scene-bar:hover,#scene-bar:focus-within{opacity:1}
+#scene-bar[hidden]{display:none}
+#scene-bar button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px;padding:0;border:0;border-radius:50%;background:none;color:#e9eaee;cursor:pointer}
+#scene-bar button:hover{background:#ffffff1a}
+#scene-bar svg{width:17px;height:17px}
+#scene-bar input[type=range]{width:84px;height:4px;margin:0 6px;accent-color:#e9eaee;cursor:pointer}
+#scene-bar .bar-divider{width:1px;height:16px;margin:0 4px;background:#ffffff26}
+#bar-quality{font-size:11px;font-weight:600;letter-spacing:.3px;color:#c8cbd1;margin-left:2px;font-variant-numeric:tabular-nums}
+#bar-quality:empty{display:none}
+/* Ciclo de 4 pomodoros no título do painel */
+.cycle-dots{display:inline-flex;align-items:center;gap:5px;margin-left:12px;vertical-align:middle}
+.cycle-dots i{width:7px;height:7px;border-radius:50%;background:#ffffff2b;transition:background .3s}
+.cycle-dots i.done{background:#eceef2}
+/* Painel Ambientes */
+#youtube-slot{margin:14px 0 4px}
+#scene-now{display:grid;gap:2px;margin:10px 0 0;padding:10px 12px;border-radius:10px;background:#ffffff0a;border:1px solid #ffffff12}
+#scene-now[hidden]{display:none}
+#scene-now span{font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#f2b47c}
+#scene-now b{font-size:12.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#scene-now small{font-size:11.5px;color:#a9adb5}
+.scene-section{margin:20px 0 8px;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#a9adb5}
+.scene-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.workspace .scene-card{display:flex;flex-direction:column;padding:0;margin:0;overflow:hidden;border-radius:10px;border:1px solid #ffffff1a;background:#ffffff08;text-align:left;cursor:pointer}
+.workspace .scene-card:hover{border-color:#ffffff40}
+.workspace .scene-card[aria-pressed=true]{border-color:#f2b47c;box-shadow:0 0 0 1px #f2b47c}
+.scene-card img,.scene-card .neutral-preview{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.scene-card .neutral-preview{background:radial-gradient(at 70% 0%,#4a515e,#1c2129)}
+.scene-card span{display:block;padding:7px 10px;font-size:12px}
+.workspace .yt-account{margin:-4px 0 14px;max-width:100%;overflow-x:auto;flex-wrap:nowrap}
+.workspace .yt-account button{white-space:nowrap}
+/* Conta Google em Aparência */
+#google-account h3{font-size:14px;margin:4px 0 6px}
+#google-account #google-state{font-size:12.5px;color:#c8cbd1;margin:0 0 10px}
+#google-account details{margin:0 0 10px}
+#google-account summary{cursor:pointer;font-size:13px;padding:6px 0}
+.workspace #settings #google-account label{display:grid;gap:6px;font-size:12px;border:0;padding:6px 0}
+.workspace #settings #google-account input{width:100%;max-width:none;box-sizing:border-box}
+#google-account button{width:100%;margin-top:8px}
+#google-account .google-service{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--ui-separator)}
+#google-account .google-service b{display:block;font-size:13.5px}
+#google-account .google-service small{display:block;font-size:11.5px;color:#a9adb5}
+.workspace #settings #google-account .google-service button{width:auto;min-width:118px;margin:0}
+#google-account #google-disconnect{margin-top:12px}
+#google-account details[hidden]{display:none}

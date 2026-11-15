@@ -8,7 +8,9 @@
 - 🗂️ **Salas Estudos e Trabalho**: tarefas e tempo de foco separados por contexto.
 - 📊 **Estatísticas** por dia, semana, mês e ano, com filtro por sala.
 - 📝 **Notas rápidas** com busca, fixação e download em `.txt`.
-- 🌧️ **Ambientes offline**: chuva binaural, lo-fi, jazz, oceano e lareira, com cenários em vídeo ou imagem parada.
+- 🌧️ **Sons offline**: chuva binaural, lo-fi, jazz, oceano e lareira, com fundo de floresta ou neutro quando não há internet.
+- 📺 **Vídeos do YouTube como fundo**: catálogo curado com Study with me, Lo-fi e jazz, Mar, Floresta, Céu e Cidade, com filtro de dia e noite.
+- 🔋 **Modo na barra** (desktop): a janela some e o tempo fica correndo na barra do sistema, gastando menos bateria. Um clique no tempo mostra a sessão, pausa e controles de volume.
 - 🪟 **Painéis arrastáveis** e **modo foco**, que esconde as ferramentas quando você para de mexer.
 - 🔒 **Local de verdade**: SQLite no desktop, `localStorage` no navegador. Nada é enviado para fora.
 
@@ -22,7 +24,7 @@ Um comando instala a última versão publicada em [Releases](https://github.com/
 curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | bash
 ```
 
-Em Ubuntu/Debian, instala o `.deb`: o `apt` instala o que faltar e pede sua senha. Nas outras distribuições, coloca o AppImage em `~/.local/bin/sussa` (requer `libfuse2`). Depois, abra com o comando `sussa`.
+Em Ubuntu/Debian, instala o `.deb`: o `apt` instala o que faltar e pede sua senha. Nas outras distribuições, coloca o AppImage em `~/.local/bin/sussa` (requer `libfuse2`). Depois, abra pelo menu de aplicativos ou com o comando `sussa`.
 
 **Windows (x64)**, no PowerShell:
 
@@ -83,30 +85,85 @@ src/
   app.js, app.css           interface principal
   workspace.js, .css        painéis móveis, ambientes e modo foco
   core.js                   cronômetro e agregação do histórico
-  audio.js, ambience.js     mixer de áudio e combinações de ambiente
+  audio.js, ambience.js     mixer de áudio e músicas offline
   notes.js                  notas com busca
+  tray.js                   modo na barra do sistema (desktop)
+  youtube.js, youtube-catalog.js  catálogo de vídeos do YouTube
+  google-account.js         seção Conta Google em Aparência
+  scene-bar.js              barra de controle do vídeo de fundo
   calendar.js               integração opcional, somente leitura, com o Google Agenda
 desktop/
   main.cjs, preload.cjs     processo principal do Electron
   store.cjs                 persistência em SQLite
-assets/                     imagens, áudios e cenários (ver Créditos)
+  google.cjs                conta Google (login, Agenda e YouTube) no desktop
+  youtube.cjs               feeds públicos dos canais do YouTube (desktop e servidor web)
+assets/                     imagens e áudios (ver Créditos)
 tests/                      testes com node:test
 server.mjs                  servidor de desenvolvimento, só em 127.0.0.1
 install.sh, install.ps1     instaladores de um comando
 ```
 
+## Vídeos do YouTube
+
+Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique no vídeo para usá-lo como fundo. Nas paisagens (Mar, Floresta, Céu e Cidade), dá para filtrar entre **Dia** e **Noite**. Os vídeos de música, como Study with me e Lo-fi, começam com som. Os outros começam sem som. O som, a pausa e o enquadramento ficam na barra discreta do rodapé.
+
+- Os canais são escolhidos a dedo em `src/youtube-catalog.js`. A lista mostra os vídeos mais recentes de cada canal, lidos do feed público que todo canal tem. Não precisa de conta nem de chave de API. Vídeos curtos (Shorts) ficam de fora.
+- Com um vídeo no fundo, aparece uma **barra discreta no rodapé** com pausar, silenciar, volume, **Inteiro / Preencher** e a qualidade atual. **Inteiro** é o padrão: o vídeo aparece todo e centralizado. **Preencher** cobre a tela e corta as bordas.
+- O YouTube escolhe a qualidade sozinho, pelo tamanho do player e pela internet, e não aceita pedido de qualidade vindo de apps. Por isso o Sussa renderiza o player com pelo menos 1920×1080, mesmo quando ele aparece menor na tela, e assim mantém 1080p.
+- Os vídeos tocam pelo player oficial do YouTube e **podem exibir anúncios**. Se o autor proibir tocar o vídeo fora do YouTube, o Sussa avisa e o vídeo fica marcado.
+- Na versão web, o `npm run dev` busca os feeds por você, porque o YouTube não permite que a página os leia diretamente.
+- No modo na barra, um vídeo de fundo sem som é pausado para economizar bateria e volta quando a janela reaparece.
+
+## Modo na barra (desktop)
+
+Clique em **⇲** no canto superior direito ou use **Ctrl+M**. A janela se esconde e a barra do sistema passa a mostrar o tempo restante, contando a cada segundo, com uma linha de progresso embaixo: laranja no foco, verde na pausa, e o tempo fica apagado quando pausado. No Windows, a bandeja só tem espaço para os minutos.
+
+Clique no número para ver a sessão e o horário de término, pausar ou retomar e, se houver som tocando, ajustar o volume geral ou silenciar tudo, inclusive os players. O volume aparece como uma barra (🔊 ▰▰▰▰▰▰▱▱▱▱ 60%). Clique nela para silenciar e use **＋/－** para ajustar. Os menus de bandeja do Ubuntu só aceitam texto, então não dá para arrastar. **Duplo clique no tempo** ou **Abrir Sussa** traz a janela de volta, assim como abrir o app de novo pelo menu.
+
+O **X** da janela segue o timer: se ele estiver rodando, o Sussa vai para a barra e continua contando. Se estiver parado, o app fecha. Para fechar de vez com o timer rodando, use **Sair** no menu da barra ou **Ctrl+Q**.
+
+Para economizar bateria, o vídeo de fundo pausa enquanto a janela está escondida e o estado é gravado uma vez por minuto em vez de a cada segundo. O cronômetro não perde tempo: ele é calculado pelo relógio.
+
 ## Seus dados
 
-- **Desktop:** histórico, tarefas, notas e preferências ficam em `workspace.sqlite`, em `~/.config/sussa` no Linux e em `%APPDATA%\sussa` no Windows. O menu **Aplicativo → Abrir pasta dos dados** mostra o local exato. Para fazer backup, feche o app e copie a pasta.
+- **Desktop:** histórico, tarefas, notas e preferências ficam em `workspace.sqlite`, em `~/.config/sussa` no Linux e em `%APPDATA%\sussa` no Windows. O botão **⚙ Aparência → Abrir pasta dos dados** mostra o local exato. Para fazer backup, feche o app e copie a pasta.
 - **Navegador:** os dados ficam no `localStorage` daquele navegador e endereço. Limpar os dados do site apaga o histórico. Use **Exportar histórico** para guardar uma cópia em JSON.
 - Os dados não são sincronizados nem criptografados, e o desktop e o navegador não compartilham dados entre si.
-- Sem internet, funcionam o cronômetro, as tarefas, as notas, as estatísticas e os ambientes incluídos. Só os players por URL (YouTube, Spotify, Apple Music), os vídeos por link e o Google Agenda dependem de internet.
+- Sem internet, funcionam o cronômetro, as tarefas, as notas, as estatísticas e os ambientes incluídos. Só os vídeos do YouTube, os players por URL do painel Mídia (YouTube, Spotify, Apple Music) e o Google Agenda dependem de internet.
 
 ### Como o cronômetro se comporta
 
-O tempo é medido pelo relógio, não por contagem de ticks, então o estado volta ao recarregar ou reabrir. Se você fechar com uma sessão rodando, ela continua contando até o fim. Pause antes de fechar para evitar isso. O alarme só toca com o app aberto. Nenhuma etapa começa sozinha. Na versão de navegador, só uma aba por vez pode registrar foco.
+O tempo é medido pelo relógio, não por contagem de ticks, então o estado volta ao recarregar ou reabrir. Se você fechar com uma sessão rodando, ela continua contando até o fim. Pause antes de fechar para evitar isso. As **4 bolinhas** ao lado do título do painel Pomodoro mostram o ciclo: cada foco concluído até o fim preenche uma. Pausas curtas e longas não contam, e um foco interrompido também não. Concluir a pausa longa zera o ciclo, assim como a virada do dia. Um quinto foco sem pausa longa começa um ciclo novo. O alarme só toca com o app aberto. Nenhuma etapa começa sozinha. Na versão de navegador, só uma aba por vez pode registrar foco.
 
-## Google Agenda (opcional)
+## Conta Google no app desktop (opcional)
+
+Em **⚙ Aparência → Conta Google**, cada serviço tem o seu botão **Conectar**, que pede só a permissão daquele serviço. Dá para ligar só a Agenda, só o YouTube ou os dois, e o segundo se soma ao primeiro sem refazer nada. Tudo é **somente leitura**:
+- **Agenda**: os eventos do dia aparecem no painel Tarefas e podem virar tarefas.
+- **YouTube**: a categoria **★ Sua conta** em Explorar YouTube, com seus vídeos curtidos, os vídeos recentes dos canais que você assina e suas playlists.
+
+O login abre na página do Google, no navegador, e volta para o Sussa por um endereço local (`127.0.0.1`). O Sussa nunca vê a sua senha. Os tokens ficam só no processo principal do app, cifrados com o chaveiro do sistema, e a página nunca os recebe. **Desconectar conta** revoga o acesso no Google.
+
+O vídeo continua tocando pelo player incorporado, sem a sua sessão do YouTube. Por isso o Premium não se aplica e podem aparecer anúncios.
+
+### Para mantenedores: credenciais embutidas
+
+Para que quem usa só precise clicar em **Conectar**, o pacote leva as credenciais OAuth do app em `desktop/google-client.json`. Esse arquivo fica fora do git (está no `.gitignore`):
+
+```json
+{ "clientId": "…apps.googleusercontent.com", "clientSecret": "GOCSPX-…" }
+```
+
+Para criá-las (uma vez, de graça):
+1. Em [console.cloud.google.com](https://console.cloud.google.com/), crie um projeto (por exemplo, "Sussa").
+2. Em **APIs e serviços → Biblioteca**, ative a **Google Calendar API** e a **YouTube Data API v3**.
+3. Em **Tela de consentimento OAuth** (Google Auth Platform), escolha **Externo** e preencha nome e e-mail de contato. Enquanto o app estiver em teste, adicione como **usuários de teste** os e-mails de quem vai usar (até 100).
+4. Em **Credenciais → Criar credenciais → ID do cliente OAuth**, escolha o tipo **App para computador**.
+
+Em apps instalados, o Google não trata o client secret como segredo (ele vai dentro do pacote). Enquanto o app não for verificado pelo Google, a tela de login mostra "o Google não verificou este app" (clique em **Continuar**). Para liberar a qualquer pessoa sem esse aviso, é preciso enviar o app para verificação, com página inicial e política de privacidade.
+
+Sem o arquivo, por exemplo num fork, a seção mostra **Credenciais próprias do Google Cloud**, onde quem usa cola as próprias credenciais.
+
+## Google Agenda na versão web (opcional)
 
 O Sussa pode listar os eventos do dia da sua agenda Google, inclusive a que você usa pelo Notion Calendar, e transformá-los em tarefas locais. A integração é **somente leitura**, com o escopo `calendar.events.readonly`. Hoje está disponível só na versão de navegador e **ainda não foi validada com uma conta real**.
 
@@ -127,9 +184,9 @@ O token fica só na memória: ao recarregar a página, é preciso entrar de novo
 ## Limitações conhecidas
 
 - Há pacotes só para **x64**. O instalador do Windows ainda não tem assinatura digital e não foi validado em uma máquina Windows real.
-- O app usa o ícone padrão do Electron.
 - Existe um único perfil local por usuário do sistema. Ainda não há importação de backup nem sincronização.
-- No desktop, players externos podem ter restrições de reprodução, e o Google Agenda fica oculto.
+- No desktop, players externos podem ter restrições de reprodução.
+- O modo na barra depende de suporte a ícones de bandeja. O Ubuntu já vem com ele. No GNOME puro, instale a extensão *AppIndicator*. Sem ela, o ícone não aparece, mas abrir o Sussa de novo traz a janela de volta.
 - O `npm audit` aponta 6 avisos moderados na cadeia de desenvolvimento do `electron-builder`. O app não tem dependências npm em produção.
 
 ## Contribuir
@@ -171,9 +228,6 @@ As mídias incluídas têm licenças próprias, separadas da licença do código
 | [Comfy](https://freelofi.com/track/comfy) (lo-fi) | Purrple Cat | CC BY 4.0 |
 | [Jazz Brunch](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1700074) | Kevin MacLeod (incompetech.com) | CC BY 4.0 |
 | [Chuva binaural](https://freesound.org/people/chromakei/sounds/396578/) | chromakei | CC0 1.0 |
-| [Biblioteca](https://www.pexels.com/video/people-studying-inside-the-library-6334252/) | cottonbro studio | Pexels License |
-| [Trabalho em casa](https://www.pexels.com/video/person-working-on-a-laptop-8472464/) | Cup of Couple | Pexels License |
-| [Pôr do sol na praia](https://www.pexels.com/video/the-sun-sets-over-the-ocean-with-waves-26310139/) | Manoo Media | Pexels License |
 | [Trilha na floresta](https://unsplash.com/photos/a-dirt-path-in-the-middle-of-a-forest-GJJdGDsoomU) | Anton Sobotyak | Unsplash License |
 
 Inspirado nas funções do [LifeAt](https://lifeat.io/).

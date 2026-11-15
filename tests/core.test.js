@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { initialState, advance, total, bounds, buckets, embedUrl } from '../src/core.js';
+import { initialState, advance, total, bounds, buckets, embedUrl, cycleCount } from '../src/core.js';
 test('background elapsed time is capped, counted once, and stops timer', () => {
   const s = initialState(); s.running = true; s.cursor = 1000; s.remaining = 5000;
   assert.equal(advance(s, 20000), true); assert.equal(s.sessions[0].end, 6000);
@@ -42,4 +42,22 @@ test('rolling periods include today and the preceding local calendar days', () =
   assert.equal(+end, +new Date(2026, 10, 13));
   assert.equal(buckets([], 'last7', date).length, 7);
   assert.equal(buckets([], 'last14', date).length, 14);
+});
+test('cycle counts only finished focus sessions, resets after long break or a new day', () => {
+  const day = new Date(2026, 10, 15, 9).getTime();
+  const s = initialState();
+  const run = (mode, at) => { s.mode = mode; s.remaining = 1000; s.running = true; s.cursor = at; advance(s, at + 5000); };
+  run('focus', day); run('short', day + 1e5); run('focus', day + 2e5);
+  assert.equal(cycleCount(s, day + 3e5), 2);
+  s.mode = 'focus'; s.remaining = 60000; s.running = true; s.cursor = day + 4e5; advance(s, day + 4e5 + 30000);
+  assert.equal(cycleCount(s, day + 5e5), 2, 'interrupted focus does not count');
+  run('focus', day + 6e5); run('focus', day + 7e5);
+  assert.equal(cycleCount(s, day + 8e5), 4);
+  run('focus', day + 9e5);
+  assert.equal(cycleCount(s, day + 1e6), 1, 'a fifth focus starts a new cycle');
+  run('long', day + 1.1e6);
+  assert.equal(cycleCount(s, day + 1.2e6), 0);
+  run('focus', day + 1.3e6);
+  assert.equal(cycleCount(s, day + 1.4e6), 1);
+  assert.equal(cycleCount(s, day + 86400000), 0, 'next day starts empty');
 });

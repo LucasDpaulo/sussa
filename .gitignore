@@ -8,3 +8,6 @@
 node_modules/
 artifacts/
 release/
+
+# Credenciais OAuth do app desktop (geradas pelo mantenedor; entram no pacote, não no git)
+desktop/google-client.json

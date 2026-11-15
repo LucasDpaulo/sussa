@@ -1,9 +1,10 @@
 import { initAmbience } from './ambience.js';
-import { initialState, advance, dayKey, bounds, total, buckets, focusStreak, embedUrl } from './core.js';
+import { initialState, advance, dayKey, bounds, total, buckets, focusStreak, embedUrl, cycleCount, CYCLE } from './core.js';
 import { Mixer } from './audio.js';
 import * as calendar from './calendar.js';
 import { initNotes } from './notes.js';
 import { initWorkspace } from './workspace.js';
+import { initTray } from './tray.js';
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const key = 'meu-espaco-v1';
 const storage = window.desktopStorage ?? localStorage;
@@ -11,8 +12,10 @@ let state = initialState(), period = 'last7', filter = '', muted = false, owned 
 try { const saved = JSON.parse(storage.getItem(key)); if (saved?.version === 1 && Array.isArray(saved.sessions) && Array.isArray(saved.tasks) && saved.durations && Number.isFinite(saved.remaining)) state = { ...state, ...saved }; } catch { /* keep a usable fresh state */ }
 state.alarm = { sound: 'bell', volume: 70, ...state.alarm };
 const mixer = new Mixer();
+let updateTray = () => {}, lastTickSave = 0;
 function save() { if (!owned) return false; try { storage.setItem(key, JSON.stringify(state)); return true; } catch { toast('Não foi possível salvar. Exporte seus dados antes de fechar.'); return false; } }
-function toast(message) { $('#toast').textContent = message; $('#toast').hidden = false; document.dispatchEvent(new Event('workspace:notice')); clearTimeout(toast.timer); toast.timer = setTimeout(() => $('#toast').hidden = true, 6000); }
+// O aviso é um popover: fica na camada superior, acima até de um diálogo aberto.
+function toast(message) { const el = $('#toast'); el.textContent = message; if (el.matches(':popover-open')) el.hidePopover(); el.showPopover(); document.dispatchEvent(new Event('workspace:notice')); clearTimeout(toast.timer); toast.timer = setTimeout(() => el.hidePopover(), 6000); }
 const escape = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const roomName = room => room === 'work' ? 'Trabalho' : 'Estudos';
 const duration = ms => {
@@ -30,7 +33,7 @@ section('tasks').innerHTML = `<header><div><h2>✓ Tarefas do dia</h2><small id=
 section('sound').innerHTML = `<header><h2>Sons</h2><button id="mute" aria-label="Silenciar sons">Silenciar</button></header><div id="mixer"></div><p class="hint">Chuva gravada em estéreo binaural. Oceano e lareira sintetizados. Delta e Theta: use fones.</p><details><summary>Adicionar áudio ambiente</summary><label class="file-label">Café, teclado ou outro som<input id="sound-file" type="file" accept="audio/*"></label><audio id="custom-audio" controls loop></audio><small>O arquivo fica nesta sessão e não é enviado.</small></details>`;
 section('player').innerHTML = `<div id="media-container"><div class="media-empty"><span>♫</span><p>Uma trilha para entrar no ritmo.</p><small>YouTube · Spotify · Apple Music</small></div></div><form id="media-form"><input id="media-url" type="url" required placeholder="Cole o link da música, vídeo ou playlist" aria-label="Link da mídia"><button>Salvar</button><button id="remove-media" type="button" aria-label="Remover mídia" title="Remover mídia">×</button></form><p class="hint">O volume e a reprodução são controlados no próprio player.</p>`;
 section('stats').innerHTML = `<p class="stats-help">Tempo de foco real; pausas não entram na conta. A sequência atual soma dias consecutivos com foco em Estudos ou Trabalho, incluindo hoje ou terminando ontem. O tempo da sequência soma somente esses dias e não muda com os filtros do gráfico.</p><div class="streak-summary"><div><small>Dias seguidos</small><strong><span aria-hidden="true">🔥</span> <span id="streak-days">0</span></strong></div><div><small>Foco na sequência</small><strong id="streak-time">0</strong></div></div><div class="stats-controls"><select id="stats-period" aria-label="Período das estatísticas"><option value="day">Hoje</option><option value="last7" selected>Últimos 7 dias</option><option value="last14">Últimos 14 dias</option><option value="month">Este mês</option><option value="year">Este ano</option></select><select id="stats-room" aria-label="Filtrar estatísticas por sala"><option value="" disabled hidden selected>Sala</option><option value="all">Todas as salas</option><option value="study">Estudos</option><option value="work">Trabalho</option></select></div><div class="stats-summary"><div><small>Total no período</small><strong id="total-focus"></strong></div><div class="study"><small>● Estudos</small><strong id="study-focus"></strong></div><div class="work"><small>● Trabalho</small><strong id="work-focus"></strong></div></div><div class="chart-card"><div class="chart-heading"><span>Tempo de foco</span><span id="chart-unit">Horas e minutos</span></div><div class="chart-layout"><div id="chart-scale" aria-hidden="true"></div><div id="chart" role="img" aria-label="Tempo de foco por intervalo"></div></div><p id="empty-stats" class="hint">Nenhum foco registrado neste período.</p></div><div class="stats-footer"><span>Horário local · semana começa na segunda</span><button id="export">↓ Exportar histórico</button></div>`;
-document.body.insertAdjacentHTML('beforeend', `<div id="toast" role="status" hidden></div><dialog id="settings"><header><h2>Seu ritmo de foco</h2><button data-close aria-label="Fechar">×</button></header><form id="settings-form"><p>Defina a duração de cada sessão, em minutos.</p><label>Pomodoro<input name="focus" type="number" min="1" max="240" required></label><label>Pausa curta<input name="short" type="number" min="1" max="120" required></label><label>Pausa longa<input name="long" type="number" min="1" max="120" required></label><p class="hint">Salvar pausa e reinicia o temporizador. O foco já registrado é preservado. Cada etapa é iniciada manualmente.</p><button class="primary">Salvar tempos</button></form><hr><label>Ambiente visual<select id="background"><option value="forest">Cinza escuro</option><option value="night">Noite tranquila</option><option value="warm">Fim de tarde</option></select></label><label class="file-label">Usar uma imagem de fundo<input id="background-file" type="file" accept="image/*"></label><p class="hint">A imagem personalizada vale para esta sessão.</p><button id="notify">Ativar aviso do navegador</button></dialog><dialog id="integrations"><header><h2>Sua agenda no foco</h2><button data-close aria-label="Fechar">×</button></header><p>Conecte a conta Google usada no Notion Calendar para ver os mesmos eventos aqui.</p><div class="connection-note">Somente leitura. Marcar uma atividade aqui não altera o evento no Google ou no Notion Calendar.</div><details open><summary>Configuração da conexão local</summary><p>Crie um cliente OAuth do tipo aplicativo web no Google Cloud, ative a Calendar API e cadastre a origem <code>http://127.0.0.1:5173</code>. Os passos estão no README do projeto.</p><label>Client ID público do Google<input id="google-client" placeholder="…apps.googleusercontent.com" autocomplete="off"></label><label>ID da agenda<input id="google-calendar" placeholder="primary"></label><small>Use “primary” para a agenda principal. Não cole senha ou Client Secret.</small><button id="prepare-google">Preparar conexão</button></details><button id="connect-google" class="primary" disabled>Entrar com Google</button><button id="refresh-calendar">Atualizar eventos</button><button id="disconnect-google">Desconectar</button><p id="integration-message" role="status">Aguardando configuração e autorização da conta.</p><a href="https://calendar.notion.so" target="_blank" rel="noopener">Abrir Notion Calendar ↗</a></dialog>`);
+document.body.insertAdjacentHTML('beforeend', `<div id="toast" role="status" popover="manual"></div><dialog id="settings"><header><h2>Seu ritmo de foco</h2><button data-close aria-label="Fechar">×</button></header><form id="settings-form"><p>Defina a duração de cada sessão, em minutos.</p><label>Pomodoro<input name="focus" type="number" min="1" max="240" required></label><label>Pausa curta<input name="short" type="number" min="1" max="120" required></label><label>Pausa longa<input name="long" type="number" min="1" max="120" required></label><p class="hint">Salvar pausa e reinicia o temporizador. O foco já registrado é preservado. Cada etapa é iniciada manualmente.</p><button class="primary">Salvar tempos</button></form><hr><label>Ambiente visual<select id="background"><option value="forest">Cinza escuro</option><option value="night">Noite tranquila</option><option value="warm">Fim de tarde</option></select></label><label class="file-label">Usar uma imagem de fundo<input id="background-file" type="file" accept="image/*"></label><p class="hint">A imagem personalizada vale para esta sessão.</p><button id="notify">Ativar aviso do navegador</button></dialog><dialog id="integrations"><header><h2>Sua agenda no foco</h2><button data-close aria-label="Fechar">×</button></header><p>Conecte a conta Google usada no Notion Calendar para ver os mesmos eventos aqui.</p><div class="connection-note">Somente leitura. Marcar uma atividade aqui não altera o evento no Google ou no Notion Calendar.</div><details open><summary>Configuração da conexão local</summary><p>Crie um cliente OAuth do tipo aplicativo web no Google Cloud, ative a Calendar API e cadastre a origem <code>http://127.0.0.1:5173</code>. Os passos estão no README do projeto.</p><label>Client ID público do Google<input id="google-client" placeholder="…apps.googleusercontent.com" autocomplete="off"></label><label>ID da agenda<input id="google-calendar" placeholder="primary"></label><small>Use “primary” para a agenda principal. Não cole senha ou Client Secret.</small><button id="prepare-google">Preparar conexão</button></details><button id="connect-google" class="primary" disabled>Entrar com Google</button><button id="refresh-calendar">Atualizar eventos</button><button id="disconnect-google">Desconectar</button><p id="integration-message" role="status">Aguardando configuração e autorização da conta.</p><a href="https://calendar.notion.so" target="_blank" rel="noopener">Abrir Notion Calendar ↗</a></dialog>`);
 $('#task-date').value = dayKey();
 $('#today-label').textContent = new Date().toLocaleDateString('pt-BR', {weekday:'long',day:'numeric',month:'long'});
 $('#background').value = state.background;
@@ -47,20 +50,33 @@ function updateTimer() {
   const [today,tomorrow] = bounds('day');
   const summary = `${streak.days} dias seguidos de foco · Hoje: ${duration(total(state.sessions,today,tomorrow))} · ${state.mode==='focus'?'Foco':'Pausa'}: ${time} restantes`;
   $('#stats-shortcut').title=summary;$('#stats-shortcut').setAttribute('aria-label',`Abrir estatísticas. ${summary}`);
+  const cycle = cycleCount(state), dots = $('#cycle-dots');
+  if (dots && dots.dataset.count !== String(cycle)) {
+    dots.dataset.count = cycle;
+    dots.innerHTML = Array.from({ length: CYCLE }, (_, i) => `<i${i < cycle ? ' class="done"' : ''}></i>`).join('');
+    dots.title = `${cycle} de ${CYCLE} pomodoros concluídos neste ciclo. Pausas não contam.`;
+    dots.setAttribute('aria-label', dots.title);
+  }
   $('#clock').textContent = time; document.title = `${state.running ? time+' · ' : ''}Sussa`;
   $('#toggle-timer').textContent = state.running ? 'Ⅱ Pausar' : state.remaining === 0 ? '↻ Nova sessão' : '▶ Iniciar';
   $('#timer-room').textContent = `${roomName(state.room)} · ${state.mode === 'focus' ? 'FOCO' : 'PAUSA'}`;
   $$('[data-room]').forEach(b => { b.classList.toggle('active', b.dataset.room===state.room); b.setAttribute('aria-pressed',b.dataset.room===state.room); });
   $$('[data-mode]').forEach(b => { b.classList.toggle('active',b.dataset.mode===state.mode); b.setAttribute('aria-pressed',b.dataset.mode===state.mode); });
   $('#timer-progress i').style.width = `${100 - state.remaining / (state.durations[state.mode]*60000)*100}%`;
+  updateTray();
 }
 function tick() {
   if (!owned) return;
-  if (advance(state)) {
+  const finished = advance(state);
+  if (finished) {
     mixer.alarm(state.alarm).catch(()=>{}); toast(state.mode==='focus'?'Sessão concluída. Hora de uma pausa!':'Pausa concluída. Pronto para continuar?');
     if ('Notification' in window && Notification.permission === 'granted') new Notification('Sussa', {body:state.mode==='focus'?'Seu Pomodoro terminou. Faça uma pausa.':'Sua pausa terminou.'});
   }
-  updateTimer(); save(); if (!document.hidden) renderStats();
+  updateTimer();
+  // Com a janela escondida, grava só a cada minuto (o cursor salvo permite recuperar o tempo decorrido).
+  const now = Date.now();
+  if (finished || !document.hidden || now - lastTickSave >= 60000) { save(); lastTickSave = now; }
+  if (!document.hidden) renderStats();
 }
 function renderTasks() {
   const date = $('#task-date').value;
@@ -133,7 +149,7 @@ async function syncMixer() {
   for (const [name,value] of Object.entries(state.volumes)) await mixer.set(name,value);
 }
 $$('[data-volume]').forEach(input=>input.oninput=async()=>{state.volumes[input.dataset.volume]=Number(input.value);input.nextElementSibling.value=input.value+'%';$('#custom-audio').volume=state.volumes.master/100;save();try{await syncMixer();}catch{toast('O áudio não está disponível neste navegador.');}});
-$('#mute').onclick=async()=>{muted=!muted;await mixer.mute(muted);$('#custom-audio').muted=muted;$('#mute').textContent=muted?'Ativar sons':'Silenciar';};
+$('#mute').onclick=async()=>{muted=!muted;await mixer.mute(muted);$('#custom-audio').muted=muted;$('#mute').textContent=muted?'Ativar sons':'Silenciar';window.desktopTray?.setMuted(muted);updateTray();};
 let soundUrl,backgroundUrl;
 $('#sound-file').onchange=e=>{const file=e.target.files[0];if(!file)return;if(soundUrl)URL.revokeObjectURL(soundUrl);soundUrl=URL.createObjectURL(file);$('#custom-audio').src=soundUrl;$('#custom-audio').volume=state.volumes.master/100;};
 $('#media-form').onsubmit=e=>{e.preventDefault();const value=$('#media-url').value.trim();if(!embedUrl(value))return toast('Use um link válido de YouTube, Spotify ou Apple Music.');state.media=value;save();renderMedia();};
@@ -180,6 +196,21 @@ updateAlarmControls();
 initNotes({state,save,canEdit:()=>owned});
 initAmbience({state, save, mixer, toast, syncVolumes: syncMixer});
 initWorkspace({state, save, toast});
+// Desktop: a Agenda usa a conta Google de ⚙ Aparência, no lugar da conexão por Client ID da versão web.
+if (window.desktopGoogle) {
+  $('.task-source button').onclick = () => { $('#settings').showModal(); $('#google-account')?.scrollIntoView({ block: 'nearest' }); };
+  document.addEventListener('google:changed', event => {
+    calendarConnected = event.detail.calendar; calendarItems = []; renderCalendar();
+    if (calendarConnected) refreshCalendar();
+  });
+}
+updateTray = initTray({
+  state,
+  toggleTimer: () => $('#toggle-timer').onclick(),
+  isMuted: () => muted,
+  toggleMute: () => $('#mute').onclick(),
+  setMasterVolume: value => { const input = $('[data-volume="master"]'); input.value = Math.max(0, Math.min(100, value)); input.oninput(); }
+});
 // Keep pointer clicks quiet visually while preserving keyboard focus indicators.
 document.addEventListener('pointerdown',()=>{document.body.dataset.inputMode='pointer';},true);
 document.addEventListener('keydown',()=>{document.body.dataset.inputMode='keyboard';},true);

@@ -11,10 +11,14 @@ export function transitionSurface(element, open, done = () => {}) {
     duration: open ? 220 : 160, easing: open ? 'cubic-bezier(.2,.8,.2,1)' : 'cubic-bezier(.4,0,1,1)', fill: 'both'
   });
   transitions.set(element, animation);
-  animation.finished.then(() => {
+  const finish = () => {
     if (transitions.get(element) !== animation) return;
     transitions.delete(element); done(); animation.cancel();
-  }).catch(() => {});
+  };
+  animation.finished.then(finish).catch(() => {});
+  // Com a janela coberta ou escondida, o navegador pode parar de desenhar e a animação não termina;
+  // o estado final (fechar o diálogo, por exemplo) não pode depender disso.
+  setTimeout(finish, (open ? 220 : 160) + 150);
 }
 
 export function initDialogs() {
@@ -53,7 +57,12 @@ const paths = {
   stats: '<path d="M4 20V4M4 20h17M9 16v-5M14 16V7M19 16v-8"/>',
   spaces: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="15.5" cy="8.5" r="1.5"/><path d="m3 17 6-6 5 5 3-3 4 4"/>',
   close: '<path d="m7 7 10 10M17 7 7 17"/>',
-  minimize: '<path d="M6 12h12"/>'
+  minimize: '<path d="M6 12h12"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  pause: '<path d="M8.5 5v14M15.5 5v14"/>',
+  muted: '<path d="m11 5-5 4H3v6h3l5 4zM16 9.5l5 5M21 9.5l-5 5"/>',
+  fitContain: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="7" y="8.5" width="10" height="7" rx="1"/>',
+  fitCover: '<path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>'
 };
 export const icon = name => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 

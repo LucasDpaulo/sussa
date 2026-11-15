@@ -1,6 +1,6 @@
 {
   "name": "sussa",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,7 @@
   },
   "main": "desktop/main.cjs",
   "description": "Pomodoro local para estudos e trabalho",
+  "desktopName": "sussa.desktop",
   "author": "LucasDpaulo",
   "devDependencies": {
     "electron": "45.3.2",
@@ -34,21 +35,19 @@
       "package.json",
       "assets/design-1.png",
       "assets/audio/**",
-      "assets/scenes/**",
-      "assets/media-credits.json"
+      "assets/media-credits.json",
+      "assets/icon.png"
     ],
     "appImage": {
       "artifactName": "sussa-${version}-${arch}.${ext}"
     },
     "linux": {
+      "icon": "build/icons",
       "category": "Office",
       "executableName": "sussa",
       "maintainer": "LucasDpaulo",
-      "desktop": {
-        "entry": {
-          "NoDisplay": "true"
-        }
-      }
+      "syncDesktopName": true,
+      "synopsis": "Pomodoro tranquilo para estudar e trabalhar"
     },
     "win": {
       "target": "nsis"

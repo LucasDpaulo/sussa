@@ -1,28 +1,17 @@
-import { scenes, presets } from './ambience.js';
 import { embedUrl } from './core.js';
+import { initYouTubeCatalog } from './youtube.js';
+import { initSceneBar } from './scene-bar.js';
+import { initGoogleAccount } from './google-account.js';
 import { transitionSurface, initDialogs, initContextHelp, initRoomMenu, icon } from './interface.js';
 
 const $ = s => document.querySelector(s);
 const labels = { hero:'Pomodoro', tasks:'Tarefas', notes:'Notas', sound:'Sons', player:'Mídia', stats:'Estatísticas', spaces:'Ambientes' };
 
 
-function assetStore(action, value) {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('meu-espaco-assets', 1);
-    request.onupgradeneeded = () => request.result.createObjectStore('backgrounds');
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      const db = request.result, tx = db.transaction('backgrounds', action === 'get' ? 'readonly' : 'readwrite');
-      const op = action === 'get' ? tx.objectStore('backgrounds').get('current') : tx.objectStore('backgrounds').put(value, 'current');
-      tx.oncomplete = () => { resolve(op.result); db.close(); };
-      tx.onerror = () => { reject(tx.error); db.close(); };
-    };
-  });
-}
 
 export function initWorkspace({state, save, toast}) {
   document.body.classList.add('workspace');
-  const preferences = state.workspace = { autoHide:true, hideAfter:5, scene:'forest', stillScene:false, videoUrl:'', backgroundVolume:0, positions:{}, sizes:{}, open:['hero'], ...state.workspace };
+  const preferences = state.workspace = { autoHide:true, hideAfter:5, scene:'forest', videoUrl:'', backgroundVolume:0, positions:{}, sizes:{}, open:['hero'], ...state.workspace };
   preferences.sizes = preferences.sizes?.player ? { player: preferences.sizes.player } : {};
   preferences.hideAfter = Math.min(120, Math.max(2, Number(preferences.hideAfter) || 5));
   const root = $('#viewport-1-winner'); root.id = 'workspace-ui';
@@ -51,7 +40,7 @@ export function initWorkspace({state, save, toast}) {
   });
   const timerRoom = document.createElement('span'); timerRoom.id='timer-room'; timerRoom.className='sr-only';hero.append(timerRoom);
 
-  document.body.insertAdjacentHTML('afterbegin', `<div id="scene" aria-hidden="true"><div id="scene-image"></div><video id="scene-video" muted loop playsinline preload="metadata" hidden></video><div id="scene-youtube" hidden></div></div>`);
+  document.body.insertAdjacentHTML('afterbegin', `<div id="scene" aria-hidden="true"><div id="scene-image"></div><div id="scene-youtube" hidden></div></div>`);
   const bar = document.createElement('div');bar.id='workspace-bar';bar.className='workspace-chrome';
   bar.innerHTML = `<div class="top-group"><span class="workspace-name">◌ Sussa</span><button id="stats-shortcut" aria-label="Abrir estatísticas" aria-controls="viewport-1-winner-stats"><span id="focus-count">0</span><span aria-hidden="true">🔥</span></button></div><div class="top-group"><label class="room-select-label">Sala <select id="workspace-room" aria-label="Sala de foco"><option value="study">Estudos</option><option value="work">Trabalho</option></select></label><button id="fullscreen" aria-label="Tela cheia" title="Tela cheia">⛶</button><button id="appearance" aria-label="Aparência" title="Aparência e modo foco">⚙</button></div>`;
   document.body.append(bar);
@@ -61,19 +50,20 @@ export function initWorkspace({state, save, toast}) {
   nav.innerHTML=Object.keys(labels).map(name=>`<button data-panel="${name}" aria-controls="viewport-1-winner-${name}" aria-expanded="false"><span>${icon(name)}</span>${labels[name]}</button>`).join('');
 
   const spaces=document.createElement('div');spaces.id='viewport-1-winner-spaces';
-  spaces.innerHTML=`<div class="panel-content"><h2>Seu ambiente</h2><p class="hint">Escolha a paisagem ou aplique uma combinação de imagem e som.</p><label>Combinações prontas<select id="ambience-preset">${Object.entries(presets).map(([id,p])=>`<option value="${id}">${p.title}</option>`).join('')}</select></label><button id="apply-ambience">Aplicar combinação</button><button id="save-ambience">Salvar minha combinação</button><button id="restore-ambience">Usar minha combinação</button><p class="hint">Combinações iniciam o som e ajustam os volumes. O silêncio geral é respeitado.</p><label>Cenários offline<select id="catalog-scene"><option value="">Escolha uma imagem</option>${scenes.map(s=>`<option value="${s.id}">${s.title}</option>`).join('')}</select></label><label><input id="still-scene" type="checkbox" ${preferences.stillScene?'checked':''}> Usar imagem parada (economizar bateria)</label><p id="scene-credit"></p><button id="forest-scene" class="scene-card"><img src="/assets/forest-trail.webp" alt="Trilha em uma floresta"><span>Trilha na floresta</span></button><button id="neutral-scene">Fundo neutro</button><hr><label class="file-label">Imagem ou vídeo do computador<input id="scene-file" type="file" accept="image/*,video/*"></label><p class="hint">O arquivo fica salvo somente neste dispositivo.</p><form id="scene-url-form"><label>Vídeo por link<input id="scene-url" type="url" placeholder="YouTube ou link direto MP4 / WebM" required></label><button>Usar vídeo</button></form><p id="scene-status" role="status"></p><div class="scene-controls"><button id="scene-play">Pausar vídeo</button><label>Áudio do vídeo<input id="scene-volume" type="range" min="0" max="100" value="${preferences.backgroundVolume}"></label></div><p class="hint">Vídeos do YouTube ficam sem áudio neste fundo. Para ouvir música, use Mídia.</p><small>Foto: <a href="https://unsplash.com/photos/a-dirt-path-in-the-middle-of-a-forest-GJJdGDsoomU" target="_blank" rel="noopener">Anton Sobotyak / Unsplash ↗</a></small></div>`;
+  spaces.innerHTML=`<div class="panel-content"><h2>Seu ambiente</h2><p class="hint">Escolha um vídeo do YouTube para o fundo ou uma imagem que funciona sem internet. O vídeo é controlado pela barra no rodapé da tela.</p><div id="youtube-slot"></div><p id="scene-now" hidden></p><p class="scene-section">Sem internet</p><div class="scene-options"><button id="forest-scene" class="scene-card" aria-pressed="false"><img src="/assets/forest-trail.webp" alt=""><span>Trilha na floresta</span></button><button id="neutral-scene" class="scene-card" aria-pressed="false"><i class="neutral-preview"></i><span>Fundo neutro</span></button></div><p id="scene-status" role="status"></p><small>Foto: <a href="https://unsplash.com/photos/a-dirt-path-in-the-middle-of-a-forest-GJJdGDsoomU" target="_blank" rel="noopener">Anton Sobotyak / Unsplash ↗</a></small></div>`;
   root.append(spaces);
-  $('#scene-url').value=preferences.videoUrl;
   const settings=$('#settings');
   settings.innerHTML=`<header><h2>Aparência e foco</h2><button data-close aria-label="Fechar">×</button></header><p>Painéis escuros sobre o seu ambiente.</p><label>Ocultar barras<input id="auto-hide" type="checkbox" ${preferences.autoHide?'checked':''}></label><label>Tempo de espera (s)<input id="hide-after" type="number" min="2" max="120" value="${preferences.hideAfter}"></label><p class="hint">As barras superior e lateral somem após a espera. Os painéis abertos continuam visíveis. Mova o mouse, toque na tela ou pressione uma tecla para mostrar as barras novamente.</p><button id="reset-layout">Restaurar posições</button><hr><button id="notify">Ativar notificações</button>`;
   settings.querySelector('[data-close]').onclick=()=>settings.close();
   $('#notify').onclick=async()=>{if(!('Notification'in window))return toast('Este navegador não oferece notificações.');toast(await Notification.requestPermission()==='granted'?'Avisos ativados.':'Avisos não autorizados.');};
+  if(window.desktopApp){const data=document.createElement('button');data.id='open-data';data.type='button';data.textContent='Abrir pasta dos dados';data.onclick=()=>window.desktopApp.openDataFolder();$('#notify').after(data);}
+  initGoogleAccount({toast});
   $('#appearance').onclick=()=>{wake();settings.showModal();};
   $('#auto-hide').onchange=e=>{preferences.autoHide=e.target.checked;save();wake();};
   $('#hide-after').onchange=e=>{preferences.hideAfter=Math.min(120,Math.max(2,Number(e.target.value)||5));e.target.value=preferences.hideAfter;save();wake();};
   $('#fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{toast('Não foi possível ativar a tela cheia.');}};
 
-  let z=20, dragging=false, inactivity, objectUrl, sceneRevision=0;
+  let z=20, dragging=false, inactivity, youtubePaused=false, pausedForTray=false, sceneBar=null;
   const panelMap=new Map();
   function hideChrome(){
     const editing=document.activeElement?.matches('input:not([type="range"]):not([type="checkbox"]):not([type="file"]),textarea,select');
@@ -132,7 +122,7 @@ export function initWorkspace({state, save, toast}) {
   for(const name of Object.keys(labels)){
     const panel=$(`#viewport-1-winner-${name}`);panel.classList.add('floating-panel');panel.dataset.window=name;panelMap.set(name,panel);
     const handle=document.createElement('div');handle.className='window-handle';handle.tabIndex=0;handle.setAttribute('aria-label',`Mover janela ${labels[name]} com as setas`);
-    handle.innerHTML=`<span>${labels[name]}</span><span class="drag-dots" aria-hidden="true">⠿</span><button aria-label="Minimizar ${labels[name]}" title="Minimizar ${labels[name]}" class="close-button">${icon('minimize')}</button>`;
+    handle.innerHTML=`<span>${labels[name]}${name==='hero'?'<span id="cycle-dots" class="cycle-dots" role="img"></span>':''}</span><span class="drag-dots" aria-hidden="true">⠿</span><button aria-label="Minimizar ${labels[name]}" title="Minimizar ${labels[name]}" class="close-button">${icon('minimize')}</button>`;
     panel.prepend(handle);
     handle.querySelector('button').onclick=()=>setOpen(name,false);
     panel.addEventListener('pointerdown',()=>{panel.style.zIndex=(z+=2);positionGrip(panel);});
@@ -175,58 +165,49 @@ export function initWorkspace({state, save, toast}) {
   $('#reset-layout').onclick=()=>{preferences.positions={};preferences.sizes={};for(const panel of panelMap.values()){panel.style.removeProperty('width');panel.style.removeProperty('height');panel.classList.remove('user-sized');}for(const [name,panel]of panelMap)if(!panel.hidden){const pos=defaultPosition(name,panel);setPosition(panel,pos.x,pos.y);}save();};
   window.addEventListener('resize',()=>{for(const panel of panelMap.values()){clampPanel(panel);if(panel.classList.contains('user-sized'))resizePanel(panel,panel.offsetWidth,panel.offsetHeight);positionGrip(panel);}});
 
-  const video=$('#scene-video'),image=$('#scene-image'),youtube=$('#scene-youtube');
-  function clearScene(){video.pause();video.removeAttribute('src');video.removeAttribute('poster');video.load();video.hidden=true;youtube.hidden=true;youtube.replaceChildren();image.hidden=false;image.style.backgroundImage='';image.classList.remove('neutral');if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null;}}
-  function controls(){const isVideo=preferences.scene==='file-video'||preferences.scene==='video-url'||(scenes.some(s=>s.id===preferences.scene)&&!preferences.stillScene);$('.scene-controls').hidden=!isVideo;$('#scene-play').textContent=video.paused?'Reproduzir vídeo':'Pausar vídeo';}
-  async function applyScene(){
-    const revision=++sceneRevision;clearScene();$('#scene-status').textContent='';
-    try{
-      const bundled = scenes.find(s => s.id === preferences.scene);
-      $('#catalog-scene').value = bundled?.id || '';
-      $('#catalog-scene').dispatchEvent(new Event('selection:sync'));
-      $('#scene-credit').textContent = bundled?.credit || '';
-      if (bundled) {
-        image.style.backgroundImage = `url("${bundled.image}")`;
-        if (!preferences.stillScene) { video.src = bundled.video; video.poster = bundled.image; video.hidden = false; }
-      }
-      else if(preferences.scene==='neutral')image.classList.add('neutral');
-      else if(preferences.scene==='file-image'||preferences.scene==='file-video'){
-        const file=await assetStore('get');if(revision!==sceneRevision)return;if(!file)throw new Error('Escolha o arquivo de fundo novamente.');
-        objectUrl=URL.createObjectURL(file);
-        if(preferences.scene==='file-image')image.style.backgroundImage=`url("${objectUrl}")`;
-        else{video.src=objectUrl;video.hidden=false;image.hidden=true;}
-      }else if(preferences.scene==='video-url'){video.src=preferences.videoUrl;video.hidden=false;image.hidden=true;}
-      else if(preferences.scene==='youtube'){
-        const url=embedUrl(preferences.videoUrl);if(!url?.startsWith('https://www.youtube-nocookie.com/'))throw new Error('Link do YouTube inválido.');
-        const id=url.split('/').at(-1),iframe=document.createElement('iframe');iframe.title='Vídeo de fundo';iframe.src=`${url}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&playsinline=1`;iframe.allow='autoplay; encrypted-media';iframe.tabIndex=-1;youtube.append(iframe);youtube.hidden=false;image.hidden=true;
-        $('#scene-status').textContent='Se o vídeo não permitir reprodução incorporada, escolha outro link ou arquivo local.';
-      }
-      if(!video.hidden){video.volume=preferences.backgroundVolume/100;video.muted=preferences.backgroundVolume===0;try{await video.play();}catch{if(revision===sceneRevision)$('#scene-status').textContent='Clique em Reproduzir vídeo para iniciar o fundo.';}}
-    }catch(error){if(revision===sceneRevision){image.hidden=false;$('#scene-status').textContent=error.message;}}
-    if(revision===sceneRevision)controls();
+  // Fundos: vídeo do YouTube (catálogo), trilha na floresta ou fundo neutro. Os dois últimos funcionam sem internet.
+  const image=$('#scene-image'),youtube=$('#scene-youtube');
+  delete preferences.stillScene;
+  if(!['forest','neutral','youtube'].includes(preferences.scene)||(preferences.scene==='youtube'&&!embedUrl(preferences.videoUrl)))preferences.scene='forest';
+  // O player do YouTube aceita comandos por postMessage quando carregado com enablejsapi=1.
+  function youtubeCommand(func,args=[]){youtube.querySelector('iframe')?.contentWindow?.postMessage(JSON.stringify({event:'command',func,args}),'https://www.youtube-nocookie.com');}
+  function youtubeVolume(){if(preferences.backgroundVolume>0){youtubeCommand('unMute');youtubeCommand('setVolume',[preferences.backgroundVolume]);}else youtubeCommand('mute');}
+  function controls(){
+    $('#forest-scene').setAttribute('aria-pressed',preferences.scene==='forest');
+    $('#neutral-scene').setAttribute('aria-pressed',preferences.scene==='neutral');
+    const now=$('#scene-now'),playing=preferences.scene==='youtube'&&preferences.videoTitle;
+    now.hidden=!playing;if(playing)now.innerHTML=`<span>Tocando agora</span><b></b><small></small>`,now.querySelector('b').textContent=preferences.videoTitle,now.querySelector('small').textContent=preferences.videoChannel||'';
+    sceneBar?.update();
   }
-  video.addEventListener('error',()=>{if(!video.hidden){image.hidden=false;video.hidden=true;$('#scene-status').textContent='Não foi possível reproduzir este vídeo. Tente MP4/WebM compatível ou outro arquivo.';controls();}});
-  $('#still-scene').onchange = e => { preferences.stillScene = e.target.checked; save(); applyScene(); };
-  $('#save-ambience').onclick = () => { state.ambience.saved = { scene: preferences.scene, track: state.ambience.track, music: state.ambience.volume, rain: state.volumes.rain, volumes: { ...state.volumes }, spatial: state.ambience.spatial, stillScene: preferences.stillScene, videoUrl: preferences.videoUrl, backgroundVolume: preferences.backgroundVolume }; save(); toast('Combinação salva neste dispositivo.'); };
-  $('#restore-ambience').onclick = () => { const saved = state.ambience.saved; if (!saved) return toast('Salve uma combinação primeiro.'); preferences.scene = saved.scene; preferences.stillScene = saved.stillScene; preferences.videoUrl = saved.videoUrl; preferences.backgroundVolume = saved.backgroundVolume; $('#still-scene').checked = preferences.stillScene; $('#scene-volume').value = preferences.backgroundVolume; $('#scene-url').value = preferences.videoUrl; save(); applyScene(); document.dispatchEvent(new CustomEvent('ambience:preset', { detail: 'saved' })); };
-  $('#catalog-scene').onchange = e => { if (!scenes.some(s => s.id === e.target.value)) return; preferences.scene = e.target.value; save(); applyScene(); };
-  $('#apply-ambience').onclick = () => { const id = $('#ambience-preset').value; preferences.scene = presets[id].scene; preferences.backgroundVolume = 0; $('#scene-volume').value = 0; save(); applyScene(); document.dispatchEvent(new CustomEvent('ambience:preset', { detail: id })); };
-  $('#forest-scene').onclick=()=>{preferences.scene='forest';save();applyScene();};
-  $('#neutral-scene').onclick=()=>{preferences.scene='neutral';save();applyScene();};
-  $('#scene-file').onchange=async e=>{
-    const file=e.target.files[0];if(!file)return;
-    if(!file.type.startsWith('image/')&&!file.type.startsWith('video/'))return toast('Escolha um arquivo de imagem ou vídeo.');
-    try{await assetStore('put',file);preferences.scene=file.type.startsWith('video/')?'file-video':'file-image';save();await applyScene();}catch{toast('Não foi possível guardar o arquivo. Tente um arquivo menor.');}
-  };
-  $('#scene-url-form').onsubmit=e=>{
-    e.preventDefault();const value=$('#scene-url').value.trim();let url;try{url=new URL(value);}catch{return toast('Informe um link válido.');}
-    if(!['http:','https:'].includes(url.protocol))return toast('Use um link HTTP ou HTTPS.');
-    const embedded=embedUrl(value);const isYoutube=embedded?.startsWith('https://www.youtube-nocookie.com/');
-    if(!isYoutube&&!/\.(mp4|webm|ogg)$/i.test(url.pathname))return toast('Use um vídeo do YouTube ou um link direto MP4/WebM.');
-    preferences.videoUrl=value;preferences.scene=isYoutube?'youtube':'video-url';save();applyScene();$('#scene-url').blur();
-  };
-  $('#scene-play').onclick=async()=>{if(video.paused){try{await video.play();$('#scene-status').textContent='';}catch{toast('Não foi possível iniciar este vídeo.');}}else video.pause();controls();};
-  $('#scene-volume').oninput=e=>{preferences.backgroundVolume=Number(e.target.value);video.volume=preferences.backgroundVolume/100;video.muted=preferences.backgroundVolume===0;save();};
+  function applyScene(){
+    youtube.hidden=true;youtube.replaceChildren();image.hidden=false;image.classList.toggle('neutral',preferences.scene==='neutral');$('#scene-status').textContent='';
+    if(preferences.scene==='youtube'){
+      const url=embedUrl(preferences.videoUrl),id=url.split('/').at(-1),iframe=document.createElement('iframe');
+      youtubePaused=false;iframe.title='Vídeo de fundo';iframe.allow='autoplay; encrypted-media';iframe.tabIndex=-1;
+      iframe.src=`${url}?autoplay=1&mute=${preferences.backgroundVolume?0:1}&controls=0&loop=1&playlist=${id}&playsinline=1&rel=0&enablejsapi=1`;
+      iframe.addEventListener('load',()=>{youtubeVolume();sceneBar?.listen(iframe);});
+      youtube.append(iframe);youtube.hidden=false;image.hidden=true;
+    }
+    controls();
+  }
+  function useScene(scene){preferences.scene=scene;save();applyScene();}
+  $('#forest-scene').onclick=()=>useScene('forest');
+  $('#neutral-scene').onclick=()=>useScene('neutral');
+  function togglePlay(){youtubePaused=!youtubePaused;youtubeCommand(youtubePaused?'pauseVideo':'playVideo');controls();}
+  function setBackgroundVolume(value){preferences.backgroundVolume=Math.max(0,Math.min(100,value));youtubeVolume();sceneBar?.update();save();}
+  sceneBar=initSceneBar({preferences,save,isVideoScene:()=>preferences.scene==='youtube',isPaused:()=>youtubePaused,togglePlay,setVolume:setBackgroundVolume,
+    onYoutubeState:playerState=>{if(playerState===1||playerState===2){youtubePaused=playerState===2;controls();}}});
+  // Modo na barra: vídeo de fundo sem som é só imagem, então pausa para poupar bateria.
+  document.addEventListener('sussa:tray',e=>{
+    if(e.detail==='entered'){pausedForTray=preferences.scene==='youtube'&&!youtubePaused&&!preferences.backgroundVolume;if(pausedForTray)youtubeCommand('pauseVideo');}
+    else{if(pausedForTray&&preferences.scene==='youtube')youtubeCommand('playVideo');pausedForTray=false;}
+  });
+  initYouTubeCatalog({preferences,save,toast,play:(video,{music})=>{
+    Object.assign(preferences,{scene:'youtube',videoUrl:`https://www.youtube.com/watch?v=${video.id}`,videoTitle:video.title,videoChannel:video.channel});
+    // Vídeos de música (study with me, lo-fi) começam com som; paisagens seguem o volume escolhido.
+    if(music&&!preferences.backgroundVolume)preferences.backgroundVolume=50;
+    save();applyScene();
+  }});
   document.querySelectorAll('dialog [data-close]').forEach(button=>{button.classList.add('close-button');button.innerHTML=icon('close');});
   initDialogs();
   initContextHelp();

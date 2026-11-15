@@ -11,10 +11,27 @@ export function advance(state, now = Date.now()) {
     if (last && last.room === state.room && last.end === state.cursor) last.end += elapsed;
     else state.sessions.push({ room: state.room, start: state.cursor, end: state.cursor + elapsed });
   }
+  const endedAt = state.cursor + elapsed;
   state.remaining -= elapsed;
   state.cursor = now;
-  if (state.remaining <= 0) { state.running = false; state.cursor = null; if (state.mode === 'focus') state.completed++; return true; }
+  if (state.remaining <= 0) {
+    state.running = false; state.cursor = null;
+    if (state.mode === 'focus') { state.completed++; completeCycle(state, endedAt); }
+    else if (state.mode === 'long') state.cycle = 0;
+    return true;
+  }
   return false;
+}
+// Ciclo de 4 pomodoros: só sessões de foco concluídas contam; pausas não. A pausa longa concluída
+// zera o ciclo, e um dia novo também. Um 5º foco sem a pausa longa começa um ciclo novo.
+export const CYCLE = 4;
+export function cycleCount(state, now = Date.now()) {
+  return state.cycleDay === dayKey(new Date(now)) ? Math.min(CYCLE, state.cycle || 0) : 0;
+}
+function completeCycle(state, at) {
+  const done = cycleCount(state, at);
+  state.cycle = done >= CYCLE ? 1 : done + 1;
+  state.cycleDay = dayKey(new Date(at));
 }
 export function bounds(period, date = new Date()) {
   const start = new Date(date); start.setHours(0, 0, 0, 0);

@@ -77,6 +77,24 @@ case "$FORMAT" in
     info "Baixando $(basename "$url") para $dest_dir/sussa..."
     download "$url" "$tmp/sussa"
     install -m 755 "$tmp/sussa" "$dest_dir/sussa"
+    # Entrada no menu de aplicativos com o ícone (o .deb já faz isso sozinho).
+    data_dir="${XDG_DATA_HOME:-$HOME/.local/share}"
+    icon_dir="$data_dir/icons/hicolor/256x256/apps"
+    mkdir -p "$icon_dir" "$data_dir/applications"
+    download "https://raw.githubusercontent.com/$REPO/main/build/icons/256x256.png" "$icon_dir/sussa.png" \
+      || printf 'Aviso: não foi possível baixar o ícone; o menu usará um ícone genérico.\n' >&2
+    cat > "$data_dir/applications/sussa.desktop" <<DESKTOP
+[Desktop Entry]
+Name=Sussa
+Comment=Pomodoro tranquilo para estudar e trabalhar
+Exec=$dest_dir/sussa %U
+Icon=sussa
+Terminal=false
+Type=Application
+Categories=Office;
+StartupWMClass=sussa
+DESKTOP
+    command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$data_dir/applications" >/dev/null 2>&1 || true
     if ! ldconfig -p 2>/dev/null | grep -q 'libfuse\.so\.2'; then
       printf '\nAviso: o AppImage precisa da libfuse2. Instale pelo gerenciador da sua distribuição\n' >&2
       printf '(ex.: "sudo dnf install fuse-libs" ou "sudo pacman -S fuse2").\n' >&2
@@ -91,4 +109,4 @@ case "$FORMAT" in
     ;;
 esac
 
-info "Pronto! Abra com o comando: sussa"
+info "Pronto! Abra o Sussa pelo menu de aplicativos ou com o comando: sussa"
