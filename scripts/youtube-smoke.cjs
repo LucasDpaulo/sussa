@@ -1,16 +1,17 @@
 // Teste de interação isolado: não usa conta, rede nem dados pessoais.
 const { app, BrowserWindow, session } = require('electron');
-const { mkdtempSync, rmSync, writeFileSync } = require('node:fs');
-const { tmpdir } = require('node:os');
+const { writeFileSync } = require('node:fs');
 const { join, resolve } = require('node:path');
 const { pathToFileURL } = require('node:url');
-const directory = mkdtempSync(join(tmpdir(), 'sussa-youtube-'));
+const directory = process.env.SUSSA_YOUTUBE_TEST_DIRECTORY;
+if (!directory) throw new Error('Execute npm run test:youtube para usar um perfil temporário.');
 app.setPath('userData', directory);
 const timeout = setTimeout(() => app.exit(1), 30000);
+process.on('uncaughtException', error => { console.error(error); app.exit(1); });
 app.whenReady().then(async () => {
   try {
     session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://*/*'] }, (_, done) => done({ cancel: true }));
-    const window = new BrowserWindow({ show: false });
+    const window = new BrowserWindow({ show: false, webPreferences: { backgroundThrottling: false } });
     const file = join(directory, 'catalog.html');
     writeFileSync(file, '<body><div id="youtube-slot"></div><style>dialog {height:400px;overflow:auto} #yt-grid {display:grid;grid-template-columns:repeat(3,1fr)} .yt-card {height:100px} img {display:none}</style></body>');
     await window.loadFile(file);
@@ -59,4 +60,3 @@ app.whenReady().then(async () => {
   } catch (error) { console.error(error); process.exitCode = 1; }
   finally { clearTimeout(timeout); app.quit(); }
 });
-app.on('quit', () => rmSync(directory, { recursive: true, force: true }));
