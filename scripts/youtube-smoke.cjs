@@ -23,7 +23,7 @@ app.whenReady().then(async () => {
           calls.push({id, cursor});
           await new Promise(r => setTimeout(r, 20));
           if (fail) throw Error('offline');
-          return { videos: Array.from({length: 6}, (_, i) => ({id: id + ':' + (i + (cursor ? 5 : 0)), title: 'Study ocean forest city night ' + i, channel: id, published: ''})), nextCursor: cursor ? null : 'next' };
+          return { videos: Array.from({length: 6}, (_, i) => ({id: id + ':' + (i + (cursor ? 5 : 0)), title: 'Study ocean forest city rain night ' + i, channel: id, published: ''})), nextCursor: cursor ? null : 'next' };
         }, embeddable: async () => true
       };
       const {initYouTubeCatalog} = await import(${JSON.stringify(pathToFileURL(resolve('src/youtube.js')).href)});
@@ -49,6 +49,11 @@ app.whenReady().then(async () => {
       $('[data-yt-period=day]').click();
       await wait(()=>$('#yt-status').textContent.includes('Nenhum'));
       if(count())throw Error('Period filter ignored');
+      $('[data-yt-category=rain]').click();
+      await wait(()=>$('#yt-status').textContent.includes('Nenhum'));
+      $('[data-yt-period=night]').click();
+      await wait(()=>count()===30);
+      if(![...document.querySelectorAll('.yt-title')].every(v=>v.textContent.includes('rain')))throw Error('Rain category ignored');
       $('[data-yt-category=lofi]').click();
       $('[data-yt-category=study]').click();
       await wait(()=>count()===30);

@@ -4,7 +4,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | bash
 #
 # Variáveis opcionais:
-#   SUSSA_VERSION=v0.3.2   instala uma versão específica em vez da mais recente
+#   SUSSA_VERSION=v0.3.3   instala uma versão específica em vez da mais recente
 #   SUSSA_FORMAT=appimage  força o AppImage mesmo em sistemas com apt
 set -euo pipefail
 

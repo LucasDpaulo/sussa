@@ -1,5 +1,6 @@
-const { app, BrowserWindow, protocol, net, ipcMain, Menu, shell, Tray, nativeImage, Notification } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, Menu, shell, Tray, nativeImage, Notification, dialog } = require('electron');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const { pathToFileURL } = require('node:url');
 const { mkdirSync } = require('node:fs');
 const { openStore } = require('./store.cjs');
@@ -10,7 +11,7 @@ const root = path.resolve(__dirname, '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 // A stable directory preserves data when the application is updated.
 app.setPath('userData', path.join(app.getPath('appData'), 'sussa'));
-let window, store, google, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false;
+let window, store, google, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false, trayHintShown = false;
 // Modo na barra: a janela fica escondida (sem desenhar nada) e o timer aparece como ícone.
 function sendTray(command) { window?.webContents.send('tray:command', command); }
 function volumeBar({ volume, muted }) {
@@ -38,19 +39,38 @@ function refreshTrayMenu() {
       { label: '－  Diminuir volume', enabled: !info.muted && info.volume > 0, click: () => sendTray('volume-down') }
     ] : []),
     { type: 'separator' },
+    ...(process.platform === 'win32' ? [{ label: 'Mostrar contador ao lado do relógio…', click: showWindowsTrayHelp }] : []),
     { label: 'Abrir Sussa (duplo clique no tempo)', click: leaveTray },
     { label: 'Sair', click: () => app.quit() }
   ]));
 }
+async function showWindowsTrayHelp() {
+  const { response } = await dialog.showMessageBox({ type: 'info', title: 'Contador ao lado do relógio',
+    message: 'Arraste o contador de dentro da seta para perto do relógio do Windows.',
+    detail: 'O Windows controla quais ícones ficam visíveis. Você também pode ativar o Sussa nas configurações da barra de tarefas, na seção de ícones da bandeja do sistema ou área de notificação.',
+    buttons: ['Entendi', 'Abrir configurações da barra'], defaultId: 0, cancelId: 0 });
+  if (response === 1) await shell.openExternal('ms-settings:taskbar').catch(() => {});
+}
 function enterTray() {
   if (!window || tray) return;
-  tray = new Tray(nativeImage.createFromPath(path.join(root, 'assets', 'icon.png')).resize({ width: 32, height: 32 }));
+  const image = nativeImage.createFromPath(path.join(root, 'assets', 'icon.png')).resize({ width: 32, height: 32 });
+  if (process.platform === 'win32') {
+    // Executáveis sem assinatura precisam de um GUID por caminho. Mantém a identidade
+    // entre entradas no modo barra e atualizações instaladas no mesmo diretório.
+    const hash = createHash('sha256').update(`sussa-tray:${process.execPath.toLowerCase()}`).digest('hex');
+    const guid = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+    tray = new Tray(image, guid);
+  } else tray = new Tray(image);
   // Linux: um clique abre o menu e o duplo clique chega como "ativar", que reabre a janela.
   tray.on('click', () => process.platform === 'linux' ? leaveTray() : tray.popUpContextMenu());
   tray.on('double-click', leaveTray);
   trayMenuKey = ''; refreshTrayMenu();
   window.hide();
   sendTray('entered');
+  if (process.platform === 'win32' && !trayHintShown) {
+    trayHintShown = true;
+    tray.displayBalloon({ title: 'Contador ao lado do relógio', content: 'Se o contador ficou dentro da seta, arraste-o para perto do relógio. O menu do contador também tem uma opção de ajuda.', noSound: true, respectQuietTime: true });
+  }
 }
 function leaveTray() {
   if (!tray) return;

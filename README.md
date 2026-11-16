@@ -9,14 +9,14 @@
 - 📊 **Estatísticas** por dia, semana, mês e ano, com filtro por sala.
 - 📝 **Notas rápidas** com busca, fixação e download em `.txt`.
 - 🌧️ **Sons offline**: chuva binaural, lo-fi, jazz, oceano e lareira, com fundo de floresta ou neutro quando não há internet.
-- 📺 **Vídeos do YouTube como fundo**: catálogo curado com Study with me, Lo-fi e jazz, Mar, Floresta, Céu e Cidade, com filtro de dia e noite.
+- 📺 **Vídeos do YouTube como fundo**: catálogo curado com Study with me, Lo-fi e jazz, Mar, Chuva, Floresta, Céu e Cidade, com filtro de dia e noite.
 - 🔋 **Modo na barra** (desktop): a janela some e o tempo fica correndo na barra do sistema, gastando menos bateria. Um clique no tempo mostra a sessão, pausa e controles de volume.
 - 🪟 **Painéis arrastáveis** e **modo foco**, que esconde as ferramentas quando você para de mexer.
 - 🔒 **Local de verdade**: SQLite no desktop, `localStorage` no navegador. Nada é enviado para fora.
 
-## Versão 0.3.2
+## Versão 0.3.3
 
-O catálogo do YouTube carrega mais vídeos conforme você rola, mantendo o nicho e o período selecionados, sem duplicações. Inclui tentativa novamente quando a conexão falha e instaladores para Windows e Linux.
+Nova categoria **Chuva**, com filtros de dia/noite e carregamento de mais vídeos ao rolar. No Windows, o contador tem identidade estável e ajuda para mantê-lo visível ao lado do relógio. Inclui instaladores para Windows e Linux.
 
 ## Instalar
 
@@ -43,18 +43,18 @@ Baixa e abre o instalador. Ele ainda não tem assinatura digital, então o Windo
 
 | Variável | Efeito |
 |---|---|
-| `SUSSA_VERSION=v0.3.2` | Instala uma versão específica, inclusive pre-releases |
+| `SUSSA_VERSION=v0.3.3` | Instala uma versão específica, inclusive pre-releases |
 | `SUSSA_FORMAT=appimage` | Linux: usa o AppImage mesmo em sistemas com `apt` |
 | `SUSSA_SILENT=1` | Windows: instala sem abrir o assistente |
 
 ```sh
 # Linux
-curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.3.2 bash
+curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.3.3 bash
 ```
 
 ```powershell
 # Windows
-$env:SUSSA_VERSION = 'v0.3.2'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
+$env:SUSSA_VERSION = 'v0.3.3'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
 ```
 
 Se preferir não rodar um script da internet, baixe o `.deb`, o AppImage ou o `.exe` direto da página de [Releases](https://github.com/LucasDpaulo/sussa/releases). Os scripts são curtos e podem ser lidos antes: [`install.sh`](install.sh) e [`install.ps1`](install.ps1).
@@ -109,7 +109,7 @@ install.sh, install.ps1     instaladores de um comando
 
 ## Vídeos do YouTube
 
-Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique no vídeo para usá-lo como fundo. Nas paisagens (Mar, Floresta, Céu e Cidade), dá para filtrar entre **Dia** e **Noite**. Os vídeos de música, como Study with me e Lo-fi, começam com som. Os outros começam sem som. O som, a pausa e o enquadramento ficam na barra discreta do rodapé.
+Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique no vídeo para usá-lo como fundo. Nas paisagens (Mar, Chuva, Floresta, Céu e Cidade), dá para filtrar entre **Dia** e **Noite**. Os vídeos de música, como Study with me e Lo-fi, começam com som. Os outros começam sem som. O som, a pausa e o enquadramento ficam na barra discreta do rodapé.
 
 - Os canais são escolhidos a dedo em `src/youtube-catalog.js`. A lista carrega lotes de 30 vídeos ao rolar perto do fim, buscando páginas das playlists públicas dos canais. O nicho e o filtro de dia/noite são mantidos, sem repetir vídeos. Também há um botão para carregar mais ou tentar novamente após uma falha de conexão. Não precisa de conta nem de chave de API. Vídeos curtos (Shorts) ficam de fora.
 - Com um vídeo no fundo, aparece uma **barra discreta no rodapé** com pausar, silenciar, volume, **Inteiro / Preencher** e a qualidade atual. **Inteiro** é o padrão: o vídeo aparece todo e centralizado. **Preencher** cobre a tela e corta as bordas.
@@ -122,6 +122,8 @@ Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique
 ## Modo na barra (desktop)
 
 Clique em **⇲** no canto superior direito ou use **Ctrl+M**. A janela se esconde e a barra do sistema passa a mostrar o tempo restante, contando a cada segundo, com uma linha de progresso embaixo: laranja no foco, verde na pausa, e o tempo fica apagado quando pausado. No Windows, a bandeja só tem espaço para os minutos.
+
+**Windows — contador fora da seta:** entre no modo barra, abra a seta de ícones ocultos e arraste o contador para perto do relógio. Também pode ativar o Sussa em **Configurações → Personalização → Barra de tarefas**, na seção de ícones da bandeja/área de notificação. O menu do contador tem **Mostrar contador ao lado do relógio…**, com um atalho para essas configurações. O Windows controla a visibilidade; o aplicativo não pode forçá-la. A identificação do ícone permanece estável entre atualizações instaladas no mesmo caminho.
 
 Clique no número para ver a sessão e o horário de término, pausar ou retomar e, se houver som tocando, ajustar o volume geral ou silenciar tudo, inclusive os players. O volume aparece como uma barra (🔊 ▰▰▰▰▰▰▱▱▱▱ 60%). Clique nela para silenciar e use **＋/－** para ajustar. Os menus de bandeja do Ubuntu só aceitam texto, então não dá para arrastar. **Duplo clique no tempo** ou **Abrir Sussa** traz a janela de volta, assim como abrir o app de novo pelo menu.
 
@@ -213,18 +215,18 @@ O projeto segue [versionamento semântico](https://semver.org/lang/pt-BR/). Cada
 
 Ao receber uma tag, o workflow [**Desktop packages**](.github/workflows/desktop.yml) roda os testes, gera o `.deb`, o AppImage e o `.exe` e cria uma **release em rascunho**, que só os mantenedores veem. Ela só fica pública, e só chega aos comandos de instalação, depois de publicada:
 
-Exemplo para a próxima versão, `0.3.3` (a atual é `0.3.2`):
+Exemplo para a próxima versão, `0.3.4` (a atual é `0.3.3`):
 
 ```sh
-npm version 0.3.3 --no-git-tag-version   # atualiza package.json e package-lock.json
-git commit -am "chore: release v0.3.3"
-git tag v0.3.3
-git push origin main v0.3.3
+npm version 0.3.4 --no-git-tag-version   # atualiza package.json e package-lock.json
+git commit -am "chore: release v0.3.4"
+git tag v0.3.4
+git push origin main v0.3.4
 # depois de testar o rascunho em Releases:
-gh release edit v0.3.3 --draft=false
+gh release edit v0.3.4 --draft=false
 ```
 
-Tags com sufixo, como `v0.3.3-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
+Tags com sufixo, como `v0.3.4-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
 
 ## Créditos
 

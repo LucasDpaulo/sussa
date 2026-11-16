@@ -55,3 +55,11 @@ test('can select beyond the former 30-video cap while keeping topic and period',
   assert.equal(result.length, 40);
   assert.equal(new Set(result.map(v => v.id)).size, 40);
 });
+
+test('rain category keeps rain and thunderstorms, excludes unrelated scenery and respects night', () => {
+  const rain = categories.find(c => c.id === 'rain');
+  const titles = ['Rain on window at night', 'Chuva na floresta', 'Thunderstorm sounds', 'Rainforest birds', 'Ocean waves without rain', 'Rainbow sky', 'Rainy morning'];
+  const videos = titles.map((title, i) => ({ id: String(i), title, published: '' }));
+  assert.deepEqual(pickVideos(rain, [videos]).map(v => v.title), [titles[0], titles[1], titles[2], titles[6]]);
+  assert.deepEqual(pickVideos(rain, [videos], 'night').map(v => v.title), [titles[0]]);
+});

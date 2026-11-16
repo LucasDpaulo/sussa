@@ -19,6 +19,14 @@ export const categories = [
       'UCS0pbRqDVOf28toP1f0SqFg': 'Geo Relaxation', 'UCjoFckSzE1jUM_kmtVHNlKg': 'Nature Soundscapes', 'UCCkmgsl8W18oR6c_W7UZ1lQ': 'TheSilentWatcher',
       'UCNjGqISO6V2WFpOFWPC8pIw': 'Naturaleza Viva', 'UCPotnGNahFjLWjfsq4KYvuQ': 'Relaxation Film'
     } },
+  { id: 'rain', title: 'Chuva', period: true,
+    match: /\brain(?:y|fall|storm|ing)?\b|\bthunder(?:storm)?s?\b|chuva|chuvoso|tempestade|trovoada|lluvia|pluie|regen|雨|빗소리/i,
+    exclude: /no rain|without rain|sem chuva|rainbow|trailer|teaser/i,
+    channels: {
+      'UCCkmgsl8W18oR6c_W7UZ1lQ': 'TheSilentWatcher', 'UCNjGqISO6V2WFpOFWPC8pIw': 'Naturaleza Viva',
+      'UCqRTj-Nu_8to3jIBlXptOtA': 'Nomadic Ambience', 'UCjoFckSzE1jUM_kmtVHNlKg': 'Nature Soundscapes',
+      'UCEknI50IEwDzpoy0rcsht2g': 'Nature for relaxing'
+    } },
   { id: 'forest', title: 'Floresta', period: true,
     match: /forest|trees?\b|woods|woodland|jungle|rainforest|river|stream|creek|mountain|lake|birdsong|moss|floresta|natureza/i,
     channels: {
