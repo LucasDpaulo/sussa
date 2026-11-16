@@ -3,6 +3,7 @@ import { googleStatus, cleanError } from './google-account.js';
 
 // No desktop, o processo principal busca os feeds; na versão web, o servidor local faz isso.
 const api = window.desktopYouTube ?? {
+  page: async (id, cursor) => { const r = await fetch(`/api/youtube/page/${id}${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`); if (!r.ok) throw new Error('Catálogo indisponível'); return r.json(); },
   channel: async id => { const r = await fetch(`/api/youtube/channel/${id}`); if (!r.ok) throw new Error('Feed indisponível'); return r.json(); },
   embeddable: async id => { const r = await fetch(`/api/youtube/embeddable/${id}`); return r.ok ? r.json() : true; }
 };
@@ -16,6 +17,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
   const feeds = new Map(), collections = new Map();
   let library = null;
   let request = 0;
+  let paging = null;
 
   const dialog = document.createElement('dialog');
   dialog.id = 'youtube-catalog';
@@ -23,7 +25,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     <div class="yt-filters"><div class="yt-tabs" role="group" aria-label="Categoria"><button type="button" data-yt-category="account" hidden>★ Sua conta</button>${categories.map(c => `<button type="button" data-yt-category="${c.id}">${c.title}</button>`).join('')}</div>
     <div class="yt-tabs yt-period" role="group" aria-label="Período">${periods.map(([id, label]) => `<button type="button" data-yt-period="${id}">${label}</button>`).join('')}</div></div>
     <div class="yt-tabs yt-account" role="group" aria-label="Coleção" hidden></div>
-    <p id="yt-status" role="status"></p><div id="yt-grid"></div>
+    <p id="yt-status" role="status"></p><div id="yt-grid"></div><button type="button" id="yt-more" hidden>Carregar mais vídeos</button>
     <p class="hint">Os vídeos tocam como fundo pelo player oficial do YouTube e podem exibir anúncios. O som, a pausa e o enquadramento ficam na barra do rodapé da tela.</p>`;
   document.body.append(dialog);
   const $ = selector => dialog.querySelector(selector);
@@ -78,11 +80,58 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     }
   }
 
+  const more = $('#yt-more');
+  more.onclick = () => loadMore();
+  dialog.addEventListener('scroll', () => {
+    if (!more.hidden && !more.disabled && dialog.scrollHeight - dialog.scrollTop - dialog.clientHeight < 450) loadMore();
+  });
+  dialog.addEventListener('close', () => { request++; paging = null; });
+
+  async function loadMore() {
+    const state = paging;
+    if (!state || state.busy || state.current !== request) return;
+    state.busy = true;
+    more.disabled = true;
+    more.textContent = 'Carregando mais vídeos…';
+    let failed = false;
+    try {
+      let candidates = pickVideos(state.category, state.channels.map(c => c.videos), state.period, Infinity).filter(v => !state.seen.has(v.id));
+      // Uma rodada por interação: filtros estreitos podem não encontrar itens nesta página.
+      if (candidates.length < 30) {
+        const pending = state.channels.filter(c => !c.done);
+        const results = await Promise.allSettled(pending.map(async channel => {
+          const page = await api.page(channel.id, channel.cursor);
+          channel.videos.push(...page.videos);
+          channel.done = !page.nextCursor || page.nextCursor === channel.cursor;
+          channel.cursor = page.nextCursor;
+        }));
+        failed = results.some(r => r.status === 'rejected');
+        if (state.current !== request) return;
+        candidates = pickVideos(state.category, state.channels.map(c => c.videos), state.period, Infinity).filter(v => !state.seen.has(v.id));
+      }
+      const batch = candidates.slice(0, 30);
+      for (const video of batch) { state.seen.add(video.id); $('#yt-grid').append(card(video, state.category)); }
+      const hasMore = candidates.length > batch.length || state.channels.some(c => !c.done);
+      more.hidden = !hasMore;
+      $('#yt-status').textContent = failed ? 'Alguns canais não responderam. Tente carregar mais novamente.' : !state.seen.size ? (hasMore ? 'Nenhum resultado nesta página. Continue buscando mais vídeos.' : 'Nenhum vídeo encontrado com esse filtro.') : '';
+      more.textContent = failed ? 'Tentar carregar mais vídeos' : 'Carregar mais vídeos';
+      if (!hasMore && state.seen.size) { more.hidden = false; more.textContent = 'Você chegou ao fim dos vídeos deste filtro.'; }
+      more.disabled = !hasMore;
+    } catch {
+      if (state.current !== request) return;
+      $('#yt-status').textContent = 'Não foi possível carregar mais vídeos. Tente novamente.';
+      more.textContent = 'Tentar novamente'; more.disabled = false;
+    } finally { state.busy = false; }
+  }
+
   async function render() {
     const connected = googleStatus().youtube;
     $('[data-yt-category=account]').hidden = !connected;
     if (prefs.category === 'account' && !connected) prefs.category = 'study';
     const current = ++request;
+    paging = null; more.hidden = true; more.disabled = false;
+    $('#yt-grid').replaceChildren();
+    dialog.scrollTop = 0;
     dialog.querySelectorAll('[data-yt-category]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ytCategory === prefs.category));
     $('.yt-account').hidden = true;
     if (prefs.category === 'account') { $('.yt-period').hidden = true; $('#yt-status').textContent = 'Carregando seus vídeos…'; return renderAccount(current); }
@@ -91,18 +140,16 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     dialog.querySelectorAll('[data-yt-period]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ytPeriod === prefs.period));
     $('.yt-period').hidden = !category.period;
     $('#yt-status').textContent = 'Carregando vídeos…';
+    // Mantém as páginas já carregadas por categoria durante esta sessão.
+    if (feeds.has(category.id) && Date.now() - feeds.get(category.id).at > 2 * 60 * 60 * 1000) feeds.delete(category.id);
     if (!feeds.has(category.id)) {
-      const results = await Promise.allSettled(Object.keys(category.channels).map(id => api.channel(id)));
-      const lists = results.filter(r => r.status === 'fulfilled').map(r => r.value);
-      // Só guarda quando ao menos um canal respondeu, para tentar de novo depois de uma falha de rede.
-      if (lists.length) feeds.set(category.id, lists);
-      if (current !== request) return;
-      if (!lists.length) { $('#yt-grid').replaceChildren(); $('#yt-status').textContent = 'Não foi possível carregar os vídeos. Verifique a conexão com a internet.'; return; }
+      const channels = Object.keys(category.channels).map(id => ({ id, videos: [], cursor: null, done: false }));
+      channels.at = Date.now();
+      feeds.set(category.id, channels);
     }
-    if (current !== request) return;
-    const videos = pickVideos(category, feeds.get(category.id), category.period ? prefs.period : 'all');
-    $('#yt-grid').replaceChildren(...videos.map(video => card(video, category)));
-    $('#yt-status').textContent = videos.length ? '' : 'Nenhum vídeo encontrado com esse filtro.';
+    paging = { current, category, period: category.period ? prefs.period : 'all', channels: feeds.get(category.id), seen: new Set(), busy: false };
+    more.hidden = false;
+    await loadMore();
   }
 
   dialog.addEventListener('click', event => {

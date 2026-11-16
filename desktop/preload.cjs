@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('desktopTray', {
   onCommand(callback) { ipcRenderer.on('tray:command', (_event, command) => callback(command)); }
 });
 contextBridge.exposeInMainWorld('desktopYouTube', {
+  page: (id, cursor) => ipcRenderer.invoke('youtube:page', id, cursor),
   channel: id => ipcRenderer.invoke('youtube:channel', id),
   embeddable: id => ipcRenderer.invoke('youtube:embeddable', id)
 });

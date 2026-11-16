@@ -10,7 +10,8 @@
     "desktop": "electron .",
     "pack:linux": "electron-builder --linux AppImage deb --publish never",
     "pack:windows": "electron-builder --win nsis --publish never",
-    "test:desktop": "node scripts/desktop-smoke.mjs"
+    "test:desktop": "node scripts/desktop-smoke.mjs",
+    "test:youtube": "electron scripts/youtube-smoke.cjs"
   },
   "main": "desktop/main.cjs",
   "description": "Pomodoro local para estudos e trabalho",

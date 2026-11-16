@@ -96,7 +96,7 @@ desktop/
   main.cjs, preload.cjs     processo principal do Electron
   store.cjs                 persistência em SQLite
   google.cjs                conta Google (login, Agenda e YouTube) no desktop
-  youtube.cjs               feeds públicos dos canais do YouTube (desktop e servidor web)
+  youtube.cjs               playlists públicas paginadas do YouTube (desktop e servidor web)
 assets/                     imagens e áudios (ver Créditos)
 tests/                      testes com node:test
 server.mjs                  servidor de desenvolvimento, só em 127.0.0.1
@@ -107,11 +107,12 @@ install.sh, install.ps1     instaladores de um comando
 
 Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique no vídeo para usá-lo como fundo. Nas paisagens (Mar, Floresta, Céu e Cidade), dá para filtrar entre **Dia** e **Noite**. Os vídeos de música, como Study with me e Lo-fi, começam com som. Os outros começam sem som. O som, a pausa e o enquadramento ficam na barra discreta do rodapé.
 
-- Os canais são escolhidos a dedo em `src/youtube-catalog.js`. A lista mostra os vídeos mais recentes de cada canal, lidos do feed público que todo canal tem. Não precisa de conta nem de chave de API. Vídeos curtos (Shorts) ficam de fora.
+- Os canais são escolhidos a dedo em `src/youtube-catalog.js`. A lista carrega lotes de 30 vídeos ao rolar perto do fim, buscando páginas das playlists públicas dos canais. O nicho e o filtro de dia/noite são mantidos, sem repetir vídeos. Também há um botão para carregar mais ou tentar novamente após uma falha de conexão. Não precisa de conta nem de chave de API. Vídeos curtos (Shorts) ficam de fora.
 - Com um vídeo no fundo, aparece uma **barra discreta no rodapé** com pausar, silenciar, volume, **Inteiro / Preencher** e a qualidade atual. **Inteiro** é o padrão: o vídeo aparece todo e centralizado. **Preencher** cobre a tela e corta as bordas.
 - O YouTube escolhe a qualidade sozinho, pelo tamanho do player e pela internet, e não aceita pedido de qualidade vindo de apps. Por isso o Sussa renderiza o player com pelo menos 1920×1080, mesmo quando ele aparece menor na tela, e assim mantém 1080p.
 - Os vídeos tocam pelo player oficial do YouTube e **podem exibir anúncios**. Se o autor proibir tocar o vídeo fora do YouTube, o Sussa avisa e o vídeo fica marcado.
-- Na versão web, o `npm run dev` busca os feeds por você, porque o YouTube não permite que a página os leia diretamente.
+- Na versão web, o `npm run dev` busca as playlists por você, porque o YouTube não permite que a página os leia diretamente.
+- A paginação depende do formato público das playlists do YouTube, que pode mudar. As coleções de **Sua conta** mantêm o carregamento existente. Teste isolado de rolagem, filtros e recuperação de conexão: `npm run test:youtube` (em ambiente restrito de desenvolvimento, pode exigir `-- --no-sandbox`).
 - No modo na barra, um vídeo de fundo sem som é pausado para economizar bateria e volta quando a janela reaparece.
 
 ## Modo na barra (desktop)

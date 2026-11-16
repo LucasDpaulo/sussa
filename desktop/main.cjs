@@ -93,6 +93,7 @@ else {
     ipcMain.handle('google:calendar', guarded((date, calendarId) => google.calendarEvents(String(date), calendarId)));
     ipcMain.handle('google:youtube-library', guarded(() => google.youtubeLibrary()));
     ipcMain.handle('google:youtube-collection', guarded((kind, id) => google.youtubeCollection(String(kind), id)));
+    ipcMain.handle('youtube:page', (event, id, cursor) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.channelPage(String(id), cursor ?? null); });
     ipcMain.handle('youtube:channel', (event, id) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.channelVideos(String(id)); });
     ipcMain.handle('youtube:embeddable', (event, id) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.embeddable(String(id)); });
     ipcMain.on('app:open-data', event => { if (trusted(event)) shell.openPath(app.getPath('userData')); });

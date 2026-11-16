@@ -10,10 +10,10 @@ http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     const pathname = decodeURIComponent(url.pathname);
     // Os feeds do YouTube não liberam CORS, então o servidor local busca por você.
-    const api = pathname.match(/^\/api\/youtube\/(channel|embeddable)\/([\w-]+)$/);
+    const api = pathname.match(/^\/api\/youtube\/(channel|page|embeddable)\/([\w-]+)$/);
     if (api) {
       try {
-        const body = JSON.stringify(api[1] === 'channel' ? await youtube.channelVideos(api[2]) : await youtube.embeddable(api[2]));
+        const body = JSON.stringify(api[1] === 'page' ? await youtube.channelPage(api[2], url.searchParams.get('cursor')) : api[1] === 'channel' ? await youtube.channelVideos(api[2]) : await youtube.embeddable(api[2]));
         res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }).end(body);
       } catch { res.writeHead(502).end('[]'); }
       return;

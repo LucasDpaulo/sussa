@@ -28,3 +28,30 @@ test('picks on-topic videos, alternating channels, filtered by day or night', ()
   assert.equal(pickVideos(sea, feeds, 'all', 3).length, 3);
   assert.ok(isNight('Tokyo at Night') && isNight('밤 공부') && !isNight('Sunny morning walk'));
 });
+
+const { parsePlaylist, extractInitialData } = createRequire(import.meta.url)('../desktop/youtube.cjs');
+test('reads both public playlist formats, skips unavailable videos and extracts continuation', () => {
+  const modern = { lockupViewModel: { contentType: 'LOCKUP_CONTENT_TYPE_VIDEO', contentId: 'abcdefghijk', metadata: { lockupMetadataViewModel: { title: { content: 'Study night' }, metadata: { contentMetadataViewModel: { metadataRows: [{ metadataParts: [{ text: { content: 'Study channel' } }] }] } } } } } };
+  const legacy = { playlistVideoRenderer: { videoId: '12345678901', title: { runs: [{ text: 'Study day' }] }, shortBylineText: { runs: [{ text: 'Other channel' }] } } };
+  const unavailable = { playlistVideoRenderer: { ...legacy.playlistVideoRenderer, videoId: 'xxxxxxxxxxx', isPlayable: false } };
+  const next = { continuationItemViewModel: { continuationCommand: { innertubeCommand: { continuationCommand: { token: 'next-page' } } } } };
+  const page = parsePlaylist({ contents: [modern, legacy, modern, unavailable, next] });
+  assert.deepEqual(page.videos.map(v => v.id), ['abcdefghijk', '12345678901']);
+  assert.equal(page.videos[0].channel, 'Study channel');
+  assert.equal(page.continuation, 'next-page');
+  assert.equal(parsePlaylist({ contents: [{ continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'legacy-next' } } } }] }).continuation, 'legacy-next');
+});
+
+test('extracts initial data despite braces and escaped quotes in video titles', () => {
+  const data = { contents: [{ title: 'Study } "rain" { night' }] };
+  assert.deepEqual(extractInitialData(`<script>var ytInitialData = ${JSON.stringify(data)};</script>`), data);
+  assert.throws(() => extractInitialData('<html>Consent required</html>'));
+});
+
+test('can select beyond the former 30-video cap while keeping topic and period', () => {
+  const study = categories.find(c => c.id === 'study');
+  const videos = Array.from({ length: 80 }, (_, i) => ({ id: String(i), title: i % 2 ? 'Study night' : 'Study morning', published: '' }));
+  const result = pickVideos(study, [videos, videos], 'night', Infinity);
+  assert.equal(result.length, 40);
+  assert.equal(new Set(result.map(v => v.id)).size, 40);
+});
