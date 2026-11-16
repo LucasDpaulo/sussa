@@ -1,17 +1,21 @@
-const { app, BrowserWindow, protocol, net, ipcMain, Menu, shell, Tray, nativeImage, Notification, dialog } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, Menu, shell, Tray, nativeImage, Notification, dialog, screen } = require('electron');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { pathToFileURL } = require('node:url');
 const { mkdirSync } = require('node:fs');
 const { openStore } = require('./store.cjs');
 const youtube = require('./youtube.cjs');
+const { createCompactWindow } = require('./compact.cjs');
 const { createGoogle } = require('./google.cjs');
+// XWayland permite redimensionar, posicionar e fixar a janela PiP no Linux.
+// O backend Wayland nativo não oferece setAlwaysOnTop no Electron.
+if (process.platform === 'linux' && process.env.DISPLAY && !app.commandLine.hasSwitch('ozone-platform')) app.commandLine.appendSwitch('ozone-platform', 'x11');
 const origin = 'app://workspace';
 const root = path.resolve(__dirname, '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 // A stable directory preserves data when the application is updated.
 app.setPath('userData', path.join(app.getPath('appData'), 'sussa'));
-let window, store, google, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false, trayHintShown = false;
+let window, compact, store, google, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false, trayHintShown = false;
 // Modo na barra: a janela fica escondida (sem desenhar nada) e o timer aparece como ícone.
 function sendTray(command) { window?.webContents.send('tray:command', command); }
 function volumeBar({ volume, muted }) {
@@ -131,6 +135,10 @@ else {
       refreshTrayMenu();
     });
     window = new BrowserWindow({ width: 1280, height: 850, minWidth: 390, minHeight: 600, title: 'Sussa', icon: path.join(root, 'assets', 'icon.png'), backgroundColor: '#191c22', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
+    compact = createCompactWindow(window, screen, state => window.webContents.send('compact:changed', state));
+    ipcMain.handle('compact:state', guarded(() => compact.state()));
+    ipcMain.handle('compact:toggle', guarded(() => { if (tray) leaveTray(); return compact.toggle(); }));
+    ipcMain.handle('compact:pin', guarded(value => compact.pin(value)));
     // X com o timer rodando: vai para a barra. Parado: fecha. "Sair" (barra, menu ou Ctrl+Q) sempre fecha.
     window.on('close', event => {
       if (quitting || !timerRunning) return;
@@ -156,7 +164,7 @@ else {
       if (input.type !== 'keyDown') return;
       const key = input.key.toLowerCase(), ctrl = input.control || input.meta, contents = window.webContents;
       const actions = {
-        m: ctrl && enterTray, q: ctrl && (() => app.quit()), f11: () => window.setFullScreen(!window.isFullScreen()),
+        m: ctrl && enterTray, q: ctrl && (() => app.quit()), f11: () => { if (!compact.state().active) window.setFullScreen(!window.isFullScreen()); },
         '=': ctrl && (() => contents.setZoomLevel(contents.getZoomLevel() + 0.5)), '+': ctrl && (() => contents.setZoomLevel(contents.getZoomLevel() + 0.5)),
         '-': ctrl && (() => contents.setZoomLevel(contents.getZoomLevel() - 0.5)), 0: ctrl && (() => contents.setZoomLevel(0))
       };

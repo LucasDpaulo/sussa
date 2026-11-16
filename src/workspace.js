@@ -2,6 +2,7 @@ import { embedUrl } from './core.js';
 import { initYouTubeCatalog } from './youtube.js';
 import { initSceneBar } from './scene-bar.js';
 import { initGoogleAccount } from './google-account.js';
+import { initCompact } from './compact.js';
 import { transitionSurface, initDialogs, initContextHelp, initRoomMenu, icon } from './interface.js';
 
 const $ = s => document.querySelector(s);
@@ -66,6 +67,7 @@ export function initWorkspace({state, save, toast}) {
   let z=20, dragging=false, inactivity, youtubePaused=false, pausedForTray=false, sceneBar=null;
   const panelMap=new Map();
   function hideChrome(){
+    if(document.body.classList.contains('compact-mode'))return;
     const editing=document.activeElement?.matches('input:not([type="range"]):not([type="checkbox"]):not([type="file"]),textarea,select');
     if(dragging || document.querySelector('dialog[open]') || config.open || editing) { scheduleHide();return; }
     document.body.classList.add('focus-hidden');
@@ -163,7 +165,7 @@ export function initWorkspace({state, save, toast}) {
   for(const [name,panel]of panelMap){const size=preferences.sizes[name];if(size){resizePanel(panel,size.width,size.height);clampPanel(panel);}}
   nav.querySelectorAll('[data-panel]').forEach(button=>button.onclick=()=>{const name=button.dataset.panel;setOpen(name,panelMap.get(name).dataset.open!=='true');});
   $('#reset-layout').onclick=()=>{preferences.positions={};preferences.sizes={};for(const panel of panelMap.values()){panel.style.removeProperty('width');panel.style.removeProperty('height');panel.classList.remove('user-sized');}for(const [name,panel]of panelMap)if(!panel.hidden){const pos=defaultPosition(name,panel);setPosition(panel,pos.x,pos.y);}save();};
-  window.addEventListener('resize',()=>{for(const panel of panelMap.values()){clampPanel(panel);if(panel.classList.contains('user-sized'))resizePanel(panel,panel.offsetWidth,panel.offsetHeight);positionGrip(panel);}});
+  window.addEventListener('resize',()=>{if(document.body.classList.contains('compact-mode'))return;for(const panel of panelMap.values()){clampPanel(panel);if(panel.classList.contains('user-sized'))resizePanel(panel,panel.offsetWidth,panel.offsetHeight);positionGrip(panel);}});
 
   // Fundos: vídeo do YouTube (catálogo), trilha na floresta ou fundo neutro. Os dois últimos funcionam sem internet.
   const image=$('#scene-image'),youtube=$('#scene-youtube');
@@ -218,5 +220,6 @@ export function initWorkspace({state, save, toast}) {
     const top=[...panelMap].filter(([,p])=>p.dataset.open==='true').sort((a,b)=>Number(b[1].style.zIndex)-Number(a[1].style.zIndex))[0];
     if(top){e.preventDefault();setOpen(top[0],false);}
   });
+  initCompact({toast});
   applyScene();wake();
 }

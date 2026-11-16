@@ -46,6 +46,55 @@ app.whenReady().then(async () => {
     })()`);
     console.log(result);
     if (process.argv.includes('--write')) {
+      const originalBounds = window.getBounds();
+      const originalMinimum = window.getMinimumSize();
+      const originalContents = window.webContents.id;
+      const result = await window.webContents.executeJavaScript(`(async () => {
+        const panel = document.querySelector('#viewport-1-winner-hero');
+        const previousStyle = panel.getAttribute('style');
+        window.__compactOriginalStyle = previousStyle;
+        window.__compactOriginalOpen = panel.hidden;
+        window.__compactOriginalSettings = JSON.parse(window.desktopStorage.getItem('meu-espaco-v1')).workspace;
+        document.querySelector('#compact-mode').click();
+        for(let i=0;i<100;i++){if((await window.desktopCompact.state()).active && !document.querySelector('#compact-tools').hidden)break;await new Promise(r=>setTimeout(r,25));}
+        if(!document.body.classList.contains('compact-mode'))throw Error('Compact mode not active');
+        document.querySelector('#compact-pin').click();
+        for(let i=0;i<100;i++){if((await window.desktopCompact.state()).pinned)break;await new Promise(r=>setTimeout(r,25));}
+        return await window.desktopCompact.state();
+      })()`);
+      if (!result.active || !result.pinned || !window.isAlwaysOnTop()) throw new Error('Compact pin failed');
+      if (window.getMinimumSize().join() !== '320,240') throw new Error('Compact minimum size incorrect');
+      window.setSize(320, 240);
+      await new Promise(r=>setTimeout(r,150));
+      await window.webContents.executeJavaScript(`(() => {
+        for (const id of ['clock','toggle-timer','reset','compact-tools']) {
+          const box=document.getElementById(id).getBoundingClientRect();
+          if(box.left<0||box.right>innerWidth+1||box.top<0||box.bottom>innerHeight+1)throw Error(id+' does not fit minimum compact size');
+        }
+        if(getComputedStyle(document.querySelector('#viewport-1-winner-nav')).display!=='none')throw Error('Sidebar visible in compact mode');
+      })()`);
+      require('node:fs').mkdirSync('artifacts', {recursive:true});
+      require('node:fs').writeFileSync('artifacts/compact-small.png', (await window.capturePage()).toPNG());
+      window.setSize(540, 360);
+      await new Promise(r=>setTimeout(r,150));
+      const fs = require('node:fs'); fs.mkdirSync('artifacts', {recursive:true});
+      fs.writeFileSync('artifacts/compact-desktop.png', (await window.capturePage()).toPNG());
+      await window.webContents.executeJavaScript(`(async () => {
+        document.querySelector('#compact-pin').click();
+        for(let i=0;i<100;i++){if(!(await window.desktopCompact.state()).pinned)break;await new Promise(r=>setTimeout(r,25));}
+        if((await window.desktopCompact.state()).pinned)throw Error('Unpin failed');
+        const clock=document.querySelector('#clock').getBoundingClientRect();
+        if(clock.left<0||clock.right>innerWidth||clock.top<0||clock.bottom>innerHeight)throw Error('Compact timer outside viewport');
+        document.querySelector('#compact-restore').click();
+        for(let i=0;i<100;i++){if(!(await window.desktopCompact.state()).active && !document.body.classList.contains('compact-mode'))break;await new Promise(r=>setTimeout(r,25));}
+        if(document.body.classList.contains('compact-mode'))throw Error('Compact mode did not restore');
+        const state=JSON.parse(window.desktopStorage.getItem('meu-espaco-v1'));
+        if(JSON.stringify(state.workspace.positions)!==JSON.stringify(window.__compactOriginalSettings.positions)||JSON.stringify(state.workspace.open)!==JSON.stringify(window.__compactOriginalSettings.open))throw Error('Compact mode changed saved panel layout');
+      })()`);
+      if (window.webContents.id !== originalContents || window.isAlwaysOnTop()) throw new Error('Compact mode replaced session or remained pinned');
+      if (window.getMinimumSize().join() !== originalMinimum.join()) throw new Error('Window minimum size not restored');
+      if (window.getBounds().width !== originalBounds.width || window.getBounds().height !== originalBounds.height) throw new Error('Window size not restored');
+      console.log('Compact window: resizing, pin/unpin, same session and layout restoration working');
       const until = async (test, message) => { for (let i = 0; i < 100; i++) { if (test()) return; await new Promise(r => setTimeout(r, 100)); } throw new Error(message + ' ' + JSON.stringify(main.trayState())); };
       await window.webContents.executeJavaScript("document.querySelector('#tray-mode').click()");
       await until(() => { const t = main.trayState(); return t.active && !t.visible && t.icons > 0 && t.info?.action === 'Pausar'; }, 'Tray mode did not start');

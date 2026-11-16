@@ -32,3 +32,10 @@ contextBridge.exposeInMainWorld('desktopGoogle', {
   youtubeLibrary: () => ipcRenderer.invoke('google:youtube-library'),
   youtubeCollection: (kind, id) => ipcRenderer.invoke('google:youtube-collection', kind, id)
 });
+
+contextBridge.exposeInMainWorld('desktopCompact', {
+  state: () => ipcRenderer.invoke('compact:state'),
+  toggle: () => ipcRenderer.invoke('compact:toggle'),
+  pin: value => ipcRenderer.invoke('compact:pin', value),
+  onChanged: callback => ipcRenderer.on('compact:changed', (_event, state) => callback(state))
+});
