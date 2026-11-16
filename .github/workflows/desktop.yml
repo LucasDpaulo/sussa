@@ -41,6 +41,12 @@ jobs:
       - name: Desktop smoke (Windows)
         if: runner.os == 'Windows'
         run: npm run test:desktop
+      - name: YouTube catalog smoke (Linux CI)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:youtube -- --no-sandbox
+      - name: YouTube catalog smoke (Windows)
+        if: runner.os == 'Windows'
+        run: npm run test:youtube
       - if: runner.os == 'Linux'
         run: npm run pack:linux
       - if: runner.os == 'Windows'

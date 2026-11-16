@@ -14,6 +14,10 @@
 - 🪟 **Painéis arrastáveis** e **modo foco**, que esconde as ferramentas quando você para de mexer.
 - 🔒 **Local de verdade**: SQLite no desktop, `localStorage` no navegador. Nada é enviado para fora.
 
+## Versão 0.3.1
+
+O catálogo do YouTube carrega mais vídeos conforme você rola, mantendo o nicho e o período selecionados, sem duplicações. Inclui tentativa novamente quando a conexão falha e instaladores para Windows e Linux.
+
 ## Instalar
 
 Um comando instala a última versão publicada em [Releases](https://github.com/LucasDpaulo/sussa/releases). Não precisa de Node.js, git nem npm. Para atualizar, rode o mesmo comando de novo.
@@ -39,18 +43,18 @@ Baixa e abre o instalador. Ele ainda não tem assinatura digital, então o Windo
 
 | Variável | Efeito |
 |---|---|
-| `SUSSA_VERSION=v0.2.0` | Instala uma versão específica, inclusive pre-releases |
+| `SUSSA_VERSION=v0.3.1` | Instala uma versão específica, inclusive pre-releases |
 | `SUSSA_FORMAT=appimage` | Linux: usa o AppImage mesmo em sistemas com `apt` |
 | `SUSSA_SILENT=1` | Windows: instala sem abrir o assistente |
 
 ```sh
 # Linux
-curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.2.0 bash
+curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.3.1 bash
 ```
 
 ```powershell
 # Windows
-$env:SUSSA_VERSION = 'v0.2.0'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
+$env:SUSSA_VERSION = 'v0.3.1'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
 ```
 
 Se preferir não rodar um script da internet, baixe o `.deb`, o AppImage ou o `.exe` direto da página de [Releases](https://github.com/LucasDpaulo/sussa/releases). Os scripts são curtos e podem ser lidos antes: [`install.sh`](install.sh) e [`install.ps1`](install.ps1).
@@ -209,16 +213,18 @@ O projeto segue [versionamento semântico](https://semver.org/lang/pt-BR/). Cada
 
 Ao receber uma tag, o workflow [**Desktop packages**](.github/workflows/desktop.yml) roda os testes, gera o `.deb`, o AppImage e o `.exe` e cria uma **release em rascunho**, que só os mantenedores veem. Ela só fica pública, e só chega aos comandos de instalação, depois de publicada:
 
+Exemplo para a próxima versão, `0.3.2` (a atual é `0.3.1`):
+
 ```sh
-npm version 0.3.0 --no-git-tag-version   # atualiza package.json e package-lock.json
-git commit -am "chore: release v0.3.0"
-git tag v0.3.0
-git push origin main v0.3.0
+npm version 0.3.2 --no-git-tag-version   # atualiza package.json e package-lock.json
+git commit -am "chore: release v0.3.2"
+git tag v0.3.2
+git push origin main v0.3.2
 # depois de testar o rascunho em Releases:
-gh release edit v0.3.0 --draft=false
+gh release edit v0.3.2 --draft=false
 ```
 
-Tags com sufixo, como `v0.3.0-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
+Tags com sufixo, como `v0.3.2-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
 
 ## Créditos
 
