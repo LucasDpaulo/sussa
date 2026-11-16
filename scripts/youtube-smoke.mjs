@@ -7,6 +7,7 @@ import electron from 'electron';
 const directory = mkdtempSync(join(tmpdir(), 'sussa-youtube-'));
 try {
   const flags = process.argv.includes('--no-sandbox') ? ['--no-sandbox'] : [];
+    if (process.platform === 'linux' && process.env.DISPLAY) flags.push('--ozone-platform=x11');
   const result = spawnSync(electron, [...flags, 'scripts/youtube-smoke.cjs'], {
     env: { ...process.env, SUSSA_YOUTUBE_TEST_DIRECTORY: directory }, stdio: 'inherit', timeout: 45000
   });

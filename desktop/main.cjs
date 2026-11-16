@@ -7,9 +7,6 @@ const { openStore } = require('./store.cjs');
 const youtube = require('./youtube.cjs');
 const { createCompactWindow } = require('./compact.cjs');
 const { createGoogle } = require('./google.cjs');
-// XWayland permite redimensionar, posicionar e fixar a janela PiP no Linux.
-// O backend Wayland nativo não oferece setAlwaysOnTop no Electron.
-if (process.platform === 'linux' && process.env.DISPLAY && !app.commandLine.hasSwitch('ozone-platform')) app.commandLine.appendSwitch('ozone-platform', 'x11');
 const origin = 'app://workspace';
 const root = path.resolve(__dirname, '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
@@ -135,7 +132,7 @@ else {
       refreshTrayMenu();
     });
     window = new BrowserWindow({ width: 1280, height: 850, minWidth: 390, minHeight: 600, title: 'Sussa', icon: path.join(root, 'assets', 'icon.png'), backgroundColor: '#191c22', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
-    compact = createCompactWindow(window, screen, state => window.webContents.send('compact:changed', state));
+    compact = createCompactWindow(window, screen, state => window.webContents.send('compact:changed', state), { pinSupported: process.platform !== 'linux' || process.argv.includes('--ozone-platform=x11') || (!process.env.WAYLAND_DISPLAY && process.env.XDG_SESSION_TYPE !== 'wayland') });
     ipcMain.handle('compact:state', guarded(() => compact.state()));
     ipcMain.handle('compact:toggle', guarded(() => { if (tray) leaveTray(); return compact.toggle(); }));
     ipcMain.handle('compact:pin', guarded(value => compact.pin(value)));

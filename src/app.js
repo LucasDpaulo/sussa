@@ -59,6 +59,7 @@ function updateTimer() {
   }
   $('#clock').textContent = time; document.title = `${state.running ? time+' · ' : ''}Sussa`;
   $('#toggle-timer').textContent = state.running ? 'Ⅱ Pausar' : state.remaining === 0 ? '↻ Nova sessão' : '▶ Iniciar';
+  $('#toggle-timer').dataset.running = String(state.running);
   $('#timer-room').textContent = `${roomName(state.room)} · ${state.mode === 'focus' ? 'FOCO' : 'PAUSA'}`;
   $$('[data-room]').forEach(b => { b.classList.toggle('active', b.dataset.room===state.room); b.setAttribute('aria-pressed',b.dataset.room===state.room); });
   $$('[data-mode]').forEach(b => { b.classList.toggle('active',b.dataset.mode===state.mode); b.setAttribute('aria-pressed',b.dataset.mode===state.mode); });

@@ -1,5 +1,5 @@
 // Mantém os elementos reais do timer e do player: nenhuma sessão paralela ou iframe duplicado.
-export function initCompact({ toast }) {
+export function initCompact({ toast, state }) {
   const bridge = window.desktopCompact;
   if (!bridge) return;
   const $ = selector => document.querySelector(selector);
@@ -14,6 +14,16 @@ export function initCompact({ toast }) {
   const tools = document.createElement('div'); tools.id = 'compact-tools'; tools.hidden = true;
   tools.innerHTML = `<button type="button" id="compact-pin" aria-label="Sempre à frente" aria-pressed="false" title="Sempre à frente">${pin}</button><button type="button" id="compact-restore" aria-label="Voltar ao tamanho normal" title="Voltar ao tamanho normal (Esc)">${expand}</button>`;
   document.body.append(tools);
+  const caption = document.createElement('div'); caption.id = 'compact-caption'; caption.hidden = true;
+  const title = document.createElement('strong'), subtitle = document.createElement('span');
+  caption.append(title, subtitle); document.body.append(caption);
+  function updateCaption() {
+    if (!active) return;
+    const prefs = state.workspace;
+    title.textContent = prefs.scene === 'youtube' ? prefs.videoTitle || 'YouTube' : prefs.scene === 'forest' ? 'Trilha na floresta' : 'Fundo neutro';
+    subtitle.textContent = `${{focus:'Foco',short:'Pausa curta',long:'Pausa longa'}[state.mode]} · ${state.room === 'work' ? 'Trabalho' : 'Estudos'}`;
+  }
+
   let snapshot = null, active = false, pinned = false, busy = false;
   function prepare() {
     if (snapshot) return;
@@ -37,9 +47,10 @@ export function initCompact({ toast }) {
       document.dispatchEvent(new Event('workspace:notice'));
       enter.focus({ preventScroll: true });
     }
-    tools.hidden = !active;
+    tools.hidden = !active; caption.hidden = !active; updateCaption();
     $('#compact-pin').setAttribute('aria-pressed', String(pinned));
-    $('#compact-pin').title = pinned ? 'Desativar sempre à frente' : 'Sempre à frente';
+    $('#compact-pin').disabled = state.pinSupported === false;
+    $('#compact-pin').title = state.pinSupported === false ? 'Fixação indisponível no Wayland nativo; reabra o aplicativo pelo atalho instalado.' : pinned ? 'Desativar sempre à frente' : 'Sempre à frente';
   }
   async function toggle() {
     if (busy) return;
@@ -62,6 +73,7 @@ export function initCompact({ toast }) {
       event.preventDefault(); event.stopImmediatePropagation(); toggle();
     }
   }, true);
+  new MutationObserver(updateCaption).observe($('#clock'), { childList: true, characterData: true, subtree: true });
   bridge.onChanged(render);
   bridge.state().then(render).catch(() => {});
 }

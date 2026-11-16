@@ -1,8 +1,8 @@
 // Reutiliza a janela existente para manter o timer, os players e o armazenamento.
-function createCompactWindow(window, screen, notify) {
+function createCompactWindow(window, screen, notify, { pinSupported = true } = {}) {
   let previous = null;
   let busy = false;
-  const state = () => ({ active: previous !== null, pinned: previous !== null && window.isAlwaysOnTop() });
+  const state = () => ({ active: previous !== null, pinned: pinSupported && previous !== null && window.isAlwaysOnTop(), pinSupported });
   const publish = () => { const value = state(); notify(value); return value; };
   async function toggle() {
     if (busy) return state();
@@ -38,7 +38,7 @@ function createCompactWindow(window, screen, notify) {
     } finally { busy = false; }
   }
   function pin(value) {
-    if (previous && typeof value === 'boolean') window.setAlwaysOnTop(value);
+    if (pinSupported && previous && typeof value === 'boolean') window.setAlwaysOnTop(value);
     return publish();
   }
   return { toggle, pin, state };

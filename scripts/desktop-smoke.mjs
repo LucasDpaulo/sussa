@@ -7,6 +7,7 @@ const directory = mkdtempSync(join(tmpdir(), 'sussa-desktop-'));
 try {
   for (const args of [['--write'], []]) {
     const testFlags = process.argv.includes('--no-sandbox') ? ['--no-sandbox'] : [];
+    if (process.platform === 'linux' && process.env.DISPLAY) testFlags.push('--ozone-platform=x11');
     const result = spawnSync(electron, [...testFlags, 'scripts/desktop-smoke.cjs', ...args], {
       env: { ...process.env, XDG_CONFIG_HOME: directory, APPDATA: directory }, stdio: 'inherit', timeout: 50000
     });

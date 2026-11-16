@@ -3,7 +3,7 @@
 #   irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
 #
 # Variáveis opcionais (defina antes de rodar):
-#   $env:SUSSA_VERSION = 'v0.3.4'   instala uma versão específica
+#   $env:SUSSA_VERSION = 'v0.3.5'   instala uma versão específica
 #   $env:SUSSA_SILENT  = '1'        instala sem abrir o assistente
 
 $ErrorActionPreference = 'Stop'

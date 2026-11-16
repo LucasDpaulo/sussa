@@ -14,9 +14,9 @@
 - 🪟 **Painéis arrastáveis** e **modo foco**, que esconde as ferramentas quando você para de mexer.
 - 🔒 **Local de verdade**: SQLite no desktop, `localStorage` no navegador. Nada é enviado para fora.
 
-## Versão 0.3.4
+## Versão 0.3.5
 
-Novo modo **picture-in-picture**: a mesma sessão em uma janela pequena e redimensionável, com opção de ficar sempre à frente. Mantém os ambientes, o cronômetro e o áudio. Inclui a categoria **Chuva** e a ajuda do contador na barra do Windows.
+**Miniplayer redesenhado:** vídeo sem cronômetro sobreposto e faixa escura inferior com tempo, pausa, reinício e identificação do ambiente. Corrigida a inicialização X11/XWayland no Linux para que **Sempre à frente** funcione de verdade. Inclui a categoria **Chuva** e a ajuda do contador na barra do Windows.
 
 ## Instalar
 
@@ -43,18 +43,18 @@ Baixa e abre o instalador. Ele ainda não tem assinatura digital, então o Windo
 
 | Variável | Efeito |
 |---|---|
-| `SUSSA_VERSION=v0.3.4` | Instala uma versão específica, inclusive pre-releases |
+| `SUSSA_VERSION=v0.3.5` | Instala uma versão específica, inclusive pre-releases |
 | `SUSSA_FORMAT=appimage` | Linux: usa o AppImage mesmo em sistemas com `apt` |
 | `SUSSA_SILENT=1` | Windows: instala sem abrir o assistente |
 
 ```sh
 # Linux
-curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.3.4 bash
+curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.3.5 bash
 ```
 
 ```powershell
 # Windows
-$env:SUSSA_VERSION = 'v0.3.4'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
+$env:SUSSA_VERSION = 'v0.3.5'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
 ```
 
 Se preferir não rodar um script da internet, baixe o `.deb`, o AppImage ou o `.exe` direto da página de [Releases](https://github.com/LucasDpaulo/sussa/releases). Os scripts são curtos e podem ser lidos antes: [`install.sh`](install.sh) e [`install.ps1`](install.ps1).
@@ -121,13 +121,13 @@ Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique
 
 ## Picture-in-picture (desktop)
 
-Clique no ícone de **janela pequena** no canto superior direito, ao lado da tela cheia, ou use **Ctrl+Shift+P**. O Sussa fica compacto, mantendo o ambiente, o cronômetro e o áudio da mesma sessão. Arraste a barra de título para mover e as bordas para aumentar ou diminuir (mínimo de 320×240).
+Clique no ícone de **janela pequena** no canto superior direito, ao lado da tela cheia, ou use **Ctrl+Shift+P**. O Sussa fica compacto, mantendo o ambiente, o cronômetro e o áudio da mesma sessão. O vídeo ocupa a área superior; tempo, pausa e reinício ficam na faixa inferior. Os controles do vídeo aparecem ao passar o mouse ou navegar pelo teclado. Arraste a barra de título para mover e as bordas para aumentar ou diminuir (mínimo de 320×240).
 
 - O **alfinete** ativa ou desativa **Sempre à frente**; a cor destaca quando está ativo.
 - O botão **Voltar ao tamanho normal**, **Esc** ou **Ctrl+Shift+P** restaura a janela e os painéis anteriores.
 - O modo compacto inicia sem fixação. Fechar ou mandar para a barra mantém o comportamento normal do aplicativo.
 
-Disponível no aplicativo desktop. No Linux, o Sussa usa X11/XWayland quando disponível para permitir a fixação; o Wayland nativo não oferece essa função pelo Electron. O modo compacto não é oferecido na versão de navegador.
+Disponível no aplicativo desktop. No Linux, o Sussa inicia com `--ozone-platform=x11` quando há X11/XWayland disponível. O parâmetro precisa estar presente antes de o Electron iniciar; defini-lo depois no JavaScript não funciona. O atalho instalado já inclui esse parâmetro e a abertura direta também é tratada. Se você escolher explicitamente Wayland nativo, o alfinete fica desabilitado porque esse backend não permite fixação pelo Electron. O modo compacto não é oferecido na versão de navegador.
 
 ## Modo na barra (desktop)
 
@@ -225,18 +225,18 @@ O projeto segue [versionamento semântico](https://semver.org/lang/pt-BR/). Cada
 
 Ao receber uma tag, o workflow [**Desktop packages**](.github/workflows/desktop.yml) roda os testes, gera o `.deb`, o AppImage e o `.exe` e cria uma **release em rascunho**, que só os mantenedores veem. Ela só fica pública, e só chega aos comandos de instalação, depois de publicada:
 
-Exemplo para a próxima versão, `0.3.5` (a atual é `0.3.4`):
+Exemplo para a próxima versão, `0.3.6` (a atual é `0.3.5`):
 
 ```sh
-npm version 0.3.5 --no-git-tag-version   # atualiza package.json e package-lock.json
-git commit -am "chore: release v0.3.5"
-git tag v0.3.5
-git push origin main v0.3.5
+npm version 0.3.6 --no-git-tag-version   # atualiza package.json e package-lock.json
+git commit -am "chore: release v0.3.6"
+git tag v0.3.6
+git push origin main v0.3.6
 # depois de testar o rascunho em Releases:
-gh release edit v0.3.5 --draft=false
+gh release edit v0.3.6 --draft=false
 ```
 
-Tags com sufixo, como `v0.3.5-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
+Tags com sufixo, como `v0.3.6-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
 
 ## Créditos
 

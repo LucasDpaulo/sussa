@@ -1,6 +1,6 @@
 {
   "name": "sussa",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "test:desktop": "node scripts/desktop-smoke.mjs",
     "test:youtube": "node scripts/youtube-smoke.mjs"
   },
-  "main": "desktop/main.cjs",
+  "main": "desktop/bootstrap.cjs",
   "description": "Pomodoro local para estudos e trabalho",
   "desktopName": "sussa.desktop",
   "author": "LucasDpaulo",
@@ -48,7 +48,10 @@
       "executableName": "sussa",
       "maintainer": "LucasDpaulo",
       "syncDesktopName": true,
-      "synopsis": "Pomodoro tranquilo para estudar e trabalhar"
+      "synopsis": "Pomodoro tranquilo para estudar e trabalhar",
+      "executableArgs": [
+        "--ozone-platform=x11"
+      ]
     },
     "win": {
       "target": "nsis"

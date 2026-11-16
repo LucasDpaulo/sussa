@@ -220,6 +220,6 @@ export function initWorkspace({state, save, toast}) {
     const top=[...panelMap].filter(([,p])=>p.dataset.open==='true').sort((a,b)=>Number(b[1].style.zIndex)-Number(a[1].style.zIndex))[0];
     if(top){e.preventDefault();setOpen(top[0],false);}
   });
-  initCompact({toast});
+  initCompact({toast,state});
   applyScene();wake();
 }

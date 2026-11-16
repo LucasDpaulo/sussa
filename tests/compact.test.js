@@ -19,7 +19,7 @@ function setup({ maximized = false, fullscreen = false } = {}) {
 test('compact mode can resize and pin without losing the original window bounds', async () => {
   const { window, compact } = setup();
   const original = window.getNormalBounds();
-  assert.deepEqual(await compact.toggle(), { active: true, pinned: false });
+  assert.deepEqual(await compact.toggle(), { active: true, pinned: false, pinSupported: true });
   assert.deepEqual(window.getMinimumSize(), [320, 240]);
   assert.equal(window.getNormalBounds().width, 420);
   compact.pin(true); assert.ok(window.isAlwaysOnTop());
@@ -39,4 +39,12 @@ test('restores fullscreen and maximized states after compact mode', async () => 
     if (initial.maximized) assert.ok(window.isMaximized());
     if (initial.fullscreen) assert.ok(window.isFullScreen());
   }
+});
+
+test('unsupported backends never report an active pin', async () => {
+  const {window} = setup();
+  const compact = createCompactWindow(window,{getDisplayMatching:()=>({workArea:{x:0,y:0,width:1920,height:1080}})},()=>{}, {pinSupported:false});
+  await compact.toggle();
+  assert.deepEqual(compact.pin(true), {active:true,pinned:false,pinSupported:false});
+  assert.equal(window.isAlwaysOnTop(),false);
 });
