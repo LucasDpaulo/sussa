@@ -52,6 +52,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Definir versão dos pacotes
+        shell: bash
         if: needs.version.result == 'success'
         env:
           RELEASE_VERSION: ${{ needs.version.outputs.number }}
