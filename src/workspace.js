@@ -197,6 +197,10 @@ export function initWorkspace({state, save, toast}) {
   $('#neutral-scene').onclick=()=>useScene('neutral');
   function togglePlay(){youtubePaused=!youtubePaused;youtubeCommand(youtubePaused?'pauseVideo':'playVideo');controls();}
   function setBackgroundVolume(value){preferences.backgroundVolume=Math.max(0,Math.min(100,value));youtubeVolume();sceneBar?.update();save();}
+  document.addEventListener('sussa:video-volume', event => {
+    setBackgroundVolume(event.detail);
+    if (pausedForTray && preferences.backgroundVolume) { pausedForTray=false; youtubeCommand('playVideo'); }
+  });
   sceneBar=initSceneBar({preferences,save,isVideoScene:()=>preferences.scene==='youtube',isPaused:()=>youtubePaused,togglePlay,setVolume:setBackgroundVolume,
     onYoutubeState:playerState=>{if(playerState===1||playerState===2){youtubePaused=playerState===2;controls();}}});
   // Modo na barra: vídeo de fundo sem som é só imagem, então pausa para poupar bateria.

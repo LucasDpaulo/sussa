@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('desktopGoogle', {
 });
 
 contextBridge.exposeInMainWorld('desktopCompact', {
+  control: action => ipcRenderer.invoke('window:control', action),
   state: () => ipcRenderer.invoke('compact:state'),
   toggle: () => ipcRenderer.invoke('compact:toggle'),
   pin: value => ipcRenderer.invoke('compact:pin', value),

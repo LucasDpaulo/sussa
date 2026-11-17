@@ -12,6 +12,7 @@ const root = path.resolve(__dirname, '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 // A stable directory preserves data when the application is updated.
 app.setPath('userData', path.join(app.getPath('appData'), 'sussa'));
+let audioPanel;
 let window, compact, store, google, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false, trayHintShown = false;
 // Modo na barra: a janela fica escondida (sem desenhar nada) e o timer aparece como ícone.
 function sendTray(command) { window?.webContents.send('tray:command', command); }
@@ -31,19 +32,19 @@ function refreshTrayMenu() {
     { label: info.title, enabled: false },
     ...(info.detail ? [{ label: info.detail, enabled: false }] : []),
     ...(info.action ? [{ label: info.action, click: () => sendTray('toggle') }] : []),
-    ...(audio ? [
-      { type: 'separator' },
-      // Menus de bandeja são só texto (sem controle deslizante): a barra é desenhada com caracteres
-      // e clicar nela silencia ou devolve o som.
-      { label: volumeBar(info), toolTip: info.muted ? 'Ativar o som' : 'Silenciar', click: () => sendTray('mute') },
-      { label: '＋  Aumentar volume', enabled: !info.muted && info.volume < 100, click: () => sendTray('volume-up') },
-      { label: '－  Diminuir volume', enabled: !info.muted && info.volume > 0, click: () => sendTray('volume-down') }
-    ] : []),
+    { label: 'Controles de áudio…', click: showAudioPanel },
     { type: 'separator' },
     ...(process.platform === 'win32' ? [{ label: 'Mostrar contador ao lado do relógio…', click: showWindowsTrayHelp }] : []),
     { label: 'Abrir Sussa (duplo clique no tempo)', click: leaveTray },
     { label: 'Sair', click: () => app.quit() }
   ]));
+}
+function showAudioPanel() {
+  if (audioPanel && !audioPanel.isDestroyed()) { audioPanel.show(); audioPanel.focus(); return; }
+  audioPanel = new BrowserWindow({ width: 340, height: 245, resizable: false, alwaysOnTop: true, autoHideMenuBar: true, title: 'Áudio · Sussa', backgroundColor: '#292d34', webPreferences: { preload: path.join(__dirname, 'audio-preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false } });
+  audioPanel.loadFile(path.join(__dirname, 'audio-panel.html'));
+  audioPanel.webContents.once('did-finish-load', () => audioPanel?.webContents.send('audio:state', trayInfo));
+  audioPanel.on('closed', () => { audioPanel = null; });
 }
 async function showWindowsTrayHelp() {
   const { response } = await dialog.showMessageBox({ type: 'info', title: 'Contador ao lado do relógio',
@@ -118,21 +119,31 @@ else {
     ipcMain.handle('youtube:channel', (event, id) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.channelVideos(String(id)); });
     ipcMain.handle('youtube:embeddable', (event, id) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.embeddable(String(id)); });
     ipcMain.on('app:open-data', event => { if (trusted(event)) shell.openPath(app.getPath('userData')); });
+    ipcMain.on('audio:set', (event, info) => {
+      if (!audioPanel || event.sender !== audioPanel.webContents || !info || !['master', 'video'].includes(info.kind) || !Number.isFinite(info.value)) return;
+      sendTray({ type: 'volume', kind: info.kind, value: Math.max(0, Math.min(100, info.value)) });
+    });
     ipcMain.on('tray:running', (event, running) => { if (trusted(event)) timerRunning = running === true; });
     ipcMain.on('tray:enter', event => { if (trusted(event)) enterTray(); });
     ipcMain.on('tray:muted', (event, muted) => { if (trusted(event)) { window.webContents.setAudioMuted(muted === true); refreshTrayMenu(); } });
     ipcMain.on('tray:update', (event, info) => {
       if (!trusted(event) || !tray || !info || typeof info !== 'object') return;
       const text = value => typeof value === 'string' ? value.slice(0, 80) : '';
-      trayInfo = { title: text(info.title) || 'Sussa', detail: text(info.detail), action: text(info.action), volume: Math.max(0, Math.min(100, Math.round(Number(info.volume)) || 0)), muted: info.muted === true };
+      trayInfo = { title: text(info.title) || 'Sussa', detail: text(info.detail), action: text(info.action), volume: Math.max(0, Math.min(100, Math.round(Number(info.volume)) || 0)), muted: info.muted === true, videoVolume: Math.max(0, Math.min(100, Number(info.videoVolume) || 0)), videoActive: info.videoActive === true };
+      audioPanel?.webContents.send('audio:state', trayInfo);
       if (info.icon instanceof Uint8Array && info.icon.byteLength < 100_000) {
         const image = nativeImage.createFromBuffer(Buffer.from(info.icon));
         if (!image.isEmpty()) { tray.setImage(image); trayIcons++; }
       }
       refreshTrayMenu();
     });
-    window = new BrowserWindow({ width: 1280, height: 850, minWidth: 390, minHeight: 600, title: 'Sussa', icon: path.join(root, 'assets', 'icon.png'), backgroundColor: '#191c22', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
+    window = new BrowserWindow({ frame: false, width: 1280, height: 850, minWidth: 390, minHeight: 600, title: 'Sussa', icon: path.join(root, 'assets', 'icon.png'), backgroundColor: '#191c22', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
     compact = createCompactWindow(window, screen, state => window.webContents.send('compact:changed', state), { pinSupported: process.platform !== 'linux' || process.argv.includes('--ozone-platform=x11') || (!process.env.WAYLAND_DISPLAY && process.env.XDG_SESSION_TYPE !== 'wayland') });
+    ipcMain.handle('window:control', guarded(action => {
+      if (action === 'close') window.close();
+      else if (action === 'minimize') window.minimize();
+      else if (action === 'maximize') { if (window.isMaximized()) window.unmaximize(); else window.maximize(); }
+    }));
     ipcMain.handle('compact:state', guarded(() => compact.state()));
     ipcMain.handle('compact:toggle', guarded(() => { if (tray) leaveTray(); return compact.toggle(); }));
     ipcMain.handle('compact:pin', guarded(value => compact.pin(value)));

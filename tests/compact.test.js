@@ -20,7 +20,7 @@ test('compact mode can resize and pin without losing the original window bounds'
   const { window, compact } = setup();
   const original = window.getNormalBounds();
   assert.deepEqual(await compact.toggle(), { active: true, pinned: false, pinSupported: true });
-  assert.deepEqual(window.getMinimumSize(), [320, 240]);
+  assert.deepEqual(window.getMinimumSize(), [260, 72]);
   assert.equal(window.getNormalBounds().width, 420);
   compact.pin(true); assert.ok(window.isAlwaysOnTop());
   compact.pin(false); assert.ok(!window.isAlwaysOnTop());

@@ -21,7 +21,7 @@ function createCompactWindow(window, screen, notify, { pinSupported = true } = {
         if (saved.maximized) window.unmaximize();
         previous = saved;
         const area = screen.getDisplayMatching(saved.bounds).workArea;
-        window.setMinimumSize(320, 240);
+        window.setMinimumSize(260, 72);
         window.setBounds({ x: Math.max(area.x, area.x + area.width - 440), y: Math.max(area.y, area.y + area.height - 340), width: 420, height: 300 });
         window.setAlwaysOnTop(false);
       } else {

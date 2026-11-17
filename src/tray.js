@@ -67,7 +67,7 @@ export function initTray({ state, toggleTimer, isMuted, toggleMute, setMasterVol
     const view = trayView(state);
     // Redesenha só quando muda o que aparece: o tempo (a cada segundo no Linux) ou um passo da linha de progresso.
     const iconKey = [wide ? view.clock : view.text, Math.round(view.progress * 28), state.mode, state.running].join('|');
-    const menu = { title: view.title, detail: view.detail, action: view.action, volume: state.volumes.master, muted: isMuted() };
+    const menu = { title: view.title, detail: view.detail, action: view.action, volume: state.volumes.master, muted: isMuted(), videoVolume: state.workspace.backgroundVolume, videoActive: state.workspace.scene === 'youtube' };
     const menuKey = JSON.stringify(menu);
     if (iconKey === lastIcon && menuKey === lastMenu) return;
     sending = true;
@@ -79,7 +79,10 @@ export function initTray({ state, toggleTimer, isMuted, toggleMute, setMasterVol
     finally { sending = false; if (pending) { pending = false; update(); } }
   }
   bridge.onCommand(async command => {
-    if (command === 'entered') {
+    if (command?.type === 'volume') {
+      if (command.kind === 'master') setMasterVolume(command.value);
+      else document.dispatchEvent(new CustomEvent('sussa:video-volume', { detail: command.value }));
+    } else if (command === 'entered') {
       active = true; lastIcon = lastMenu = '';
       // O vídeo de fundo é o maior gasto de bateria e ninguém o vê com a janela escondida.
       document.dispatchEvent(new CustomEvent('sussa:tray', { detail: 'entered' }));

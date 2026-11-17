@@ -158,7 +158,12 @@ body.workspace{--ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,s
 .workspace .info-popover strong{display:block;font-size:13px;font-weight:600;color:#fff;margin-bottom:8px}
 .workspace .info-copy+.info-copy{margin-top:10px}
 .workspace .info-copy .dot{display:none}
-.workspace #settings{width:min(94vw,460px);padding:24px}
+.workspace #settings{width:min(94vw,460px);padding:24px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#676b74 transparent;clip-path:inset(0 round 22px)}
+.workspace #settings::-webkit-scrollbar{width:6px}
+.workspace #settings::-webkit-scrollbar-track{background:transparent;margin-block:22px}
+.workspace #settings::-webkit-scrollbar-thumb{background:#676b74;border-radius:999px}
+.workspace #settings::-webkit-scrollbar-thumb:hover{background:#858b96}
+.workspace #settings::-webkit-scrollbar-button{display:none;width:0;height:0}
 .workspace #settings header{flex-wrap:nowrap;margin-bottom:16px;gap:8px}
 .workspace #settings h2{font-size:18px;line-height:1.35;font-weight:600;text-align:left;letter-spacing:-.3px;margin:0}
 .workspace #settings>label{display:grid;grid-template-columns:minmax(0,1fr) 80px;align-items:center;gap:20px;min-height:64px;padding:12px 0;margin:0;font-size:14px;line-height:1.4;text-align:left;border-bottom:1px solid var(--ui-separator)}
@@ -551,3 +556,24 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 .workspace.compact-mode #scene-bar input[type=range]{width:64px}
 .workspace.compact-mode #toast{max-width:calc(100vw - 24px);font-size:12px}
 @media(pointer:coarse){.workspace.compact-mode #scene-bar{opacity:1!important;pointer-events:auto!important}}
+/* Moldura integrada: o mesmo player pode encolher até uma faixa. */
+.desktop-frameless #workspace-bar{ -webkit-app-region:drag }
+.desktop-frameless #workspace-bar button,.desktop-frameless #workspace-bar select,.desktop-frameless #workspace-bar label{ -webkit-app-region:no-drag }
+#desktop-window-controls{display:flex;gap:3px}
+#desktop-window-controls button{width:28px;padding:3px;font-size:18px}
+.workspace.compact-mode #scene,.workspace.compact-mode #compact-caption,.workspace.compact-mode #clock{-webkit-app-region:drag}
+.workspace.compact-mode #compact-tools,.workspace.compact-mode #toggle-timer,.workspace.compact-mode #reset,.workspace.compact-mode #scene-bar{-webkit-app-region:no-drag}
+@media(max-height:160px){
+.workspace.compact-mode{--mini-footer:100dvh}
+.workspace.compact-mode #scene,.workspace.compact-mode #scene-bar{display:none!important}
+.workspace.compact-mode #compact-tools{top:3px;right:4px;padding:0;background:transparent;border:0}
+.workspace.compact-mode #compact-tools button{height:22px;width:24px}
+.workspace.compact-mode #compact-tools svg{width:15px;height:15px}
+.workspace.compact-mode #workspace-ui>#viewport-1-winner-hero>.timer-body{padding:25px 10px 0}
+.workspace.compact-mode #viewport-1-winner-hero #clock{font-size:23px;line-height:34px}
+.workspace.compact-mode #viewport-1-winner-hero #toggle-timer{width:32px;height:32px;min-width:32px;min-height:32px}
+.workspace.compact-mode #viewport-1-winner-hero .timer-row{grid-template-columns:minmax(0,1fr) 32px 24px;gap:8px}
+.workspace.compact-mode #compact-caption{left:10px;right:76px;top:6px;bottom:auto;line-height:1.2}
+.workspace.compact-mode #compact-caption strong{font-size:10px}
+.workspace.compact-mode #compact-caption span{display:none}
+}
