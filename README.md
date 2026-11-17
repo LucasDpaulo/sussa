@@ -18,9 +18,27 @@
 
 **Miniplayer redesenhado:** vídeo sem cronômetro sobreposto e faixa escura inferior com tempo, pausa, reinício e identificação do ambiente. Corrigida a inicialização X11/XWayland no Linux para que **Sempre à frente** funcione de verdade. Inclui a categoria **Chuva** e a ajuda do contador na barra do Windows.
 
+## Instalar ou atualizar
+
+Cada envio à `main` gera uma nova release após os testes de Linux e Windows passarem. Para instalar ou atualizar, execute novamente o comando da sua plataforma.
+
+**Linux (x64):**
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | bash
+```
+
+**Windows (x64), no PowerShell:**
+
+```powershell
+irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
+```
+
+A atualização depende de executar o comando; o app não atualiza sozinho ao abrir.
+
 ## Rodar pelo código (Linux e Windows)
 
-Por enquanto, o Sussa é distribuído pelo código. Novas alterações não geram instaladores nem atualizam automaticamente o aplicativo.
+Para desenvolver ou executar diretamente pelo código, siga os passos abaixo.
 
 Instale **Git** e **Node.js 22 ou posterior**. Os comandos abaixo funcionam no terminal do Linux e no PowerShell do Windows:
 
@@ -189,9 +207,9 @@ Os commits seguem o padrão [Conventional Commits](https://www.conventionalcommi
 
 ## Versões
 
-O projeto segue versionamento semântico. A distribuição atual é pelo código da branch `main`, para Linux e Windows.
+Cada push em `main` aciona o workflow [Desktop packages](.github/workflows/desktop.yml). Ele escolhe a próxima versão patch após a maior versão estável publicada ou registrada no projeto, aplica essa versão aos pacotes e publica uma release com tag apontando para o commit enviado. Não cria commits automáticos na branch.
 
-O workflow [Desktop checks](.github/workflows/desktop.yml) executa os testes nas duas plataformas, sem gerar instaladores ou criar releases. As releases publicadas anteriormente continuam disponíveis como histórico.
+A publicação só acontece após os testes e os instaladores de Linux e Windows terminarem com sucesso. Pushes em `dev` e pull requests executam apenas os testes.
 
 ## Créditos
 
