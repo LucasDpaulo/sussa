@@ -63,8 +63,8 @@ app.whenReady().then(async () => {
         return await window.desktopCompact.state();
       })()`);
       if (!result.active || !result.pinned || !window.isAlwaysOnTop()) throw new Error('Compact pin failed');
-      if (window.getMinimumSize().join() !== '320,240') throw new Error('Compact minimum size incorrect');
-      window.setSize(320, 240);
+      if (window.getMinimumSize().join() !== '260,72') throw new Error('Compact minimum size incorrect');
+      window.setSize(260, 72);
       await new Promise(r=>setTimeout(r,150));
       await window.webContents.executeJavaScript(`(() => {
         for (const id of ['clock','toggle-timer','reset','compact-tools']) {
