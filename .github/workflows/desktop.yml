@@ -1,18 +1,15 @@
-name: Desktop packages
-# - Rodar manualmente (workflow_dispatch): só gera os pacotes como artefatos, sem release.
-# - Enviar uma tag vX.Y.Z: gera os pacotes e cria uma release em RASCUNHO (só quem tem acesso
-#   ao repositório vê). Revise e publique pelo GitHub ou com: gh release edit vX.Y.Z --draft=false
-# - Tags com sufixo (vX.Y.Z-beta.1, -rc.1...) viram pre-release ao publicar: o install.sh/install.ps1
-#   padrão ignoram pre-releases e rascunhos, então ninguém recebe uma versão de teste sem pedir.
+name: Desktop checks
+# Distribuição pelo código: valida Linux e Windows sem gerar instaladores ou releases.
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
 permissions:
   contents: read
 jobs:
-  package:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -47,35 +44,3 @@ jobs:
       - name: YouTube catalog smoke (Windows)
         if: runner.os == 'Windows'
         run: npm run test:youtube
-      - if: runner.os == 'Linux'
-        run: npm run pack:linux
-      - if: runner.os == 'Windows'
-        run: npm run pack:windows
-      - uses: actions/upload-artifact@v4
-        with:
-          name: desktop-${{ runner.os }}
-          if-no-files-found: error
-          path: |
-            release/*.deb
-            release/*.AppImage
-            release/*.exe
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: package
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-      - name: Criar release em rascunho
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          flags="--draft --generate-notes --title $TAG"
-          case "$TAG" in *-*) flags="$flags --prerelease" ;; esac
-          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" $flags

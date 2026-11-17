@@ -18,69 +18,37 @@
 
 **Miniplayer redesenhado:** vídeo sem cronômetro sobreposto e faixa escura inferior com tempo, pausa, reinício e identificação do ambiente. Corrigida a inicialização X11/XWayland no Linux para que **Sempre à frente** funcione de verdade. Inclui a categoria **Chuva** e a ajuda do contador na barra do Windows.
 
-## Instalar
+## Rodar pelo código (Linux e Windows)
 
-Um comando instala a última versão publicada em [Releases](https://github.com/LucasDpaulo/sussa/releases). Não precisa de Node.js, git nem npm. Para atualizar, rode o mesmo comando de novo.
+Por enquanto, o Sussa é distribuído pelo código. Novas alterações não geram instaladores nem atualizam automaticamente o aplicativo.
 
-**Linux (x64)**, no terminal:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | bash
-```
-
-Em Ubuntu/Debian, instala o `.deb`: o `apt` instala o que faltar e pede sua senha. Nas outras distribuições, coloca o AppImage em `~/.local/bin/sussa` (requer `libfuse2`). Depois, abra pelo menu de aplicativos ou com o comando `sussa`.
-
-**Windows (x64)**, no PowerShell:
-
-```powershell
-irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
-```
-
-Baixa e abre o instalador. Ele ainda não tem assinatura digital, então o Windows pode mostrar o aviso do SmartScreen: clique em **Mais informações → Executar assim mesmo**.
-
-<details>
-<summary>Opções de instalação</summary>
-
-| Variável | Efeito |
-|---|---|
-| `SUSSA_VERSION=v0.3.5` | Instala uma versão específica, inclusive pre-releases |
-| `SUSSA_FORMAT=appimage` | Linux: usa o AppImage mesmo em sistemas com `apt` |
-| `SUSSA_SILENT=1` | Windows: instala sem abrir o assistente |
-
-```sh
-# Linux
-curl -fsSL https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.sh | SUSSA_VERSION=v0.3.5 bash
-```
-
-```powershell
-# Windows
-$env:SUSSA_VERSION = 'v0.3.5'; irm https://raw.githubusercontent.com/LucasDpaulo/sussa/main/install.ps1 | iex
-```
-
-Se preferir não rodar um script da internet, baixe o `.deb`, o AppImage ou o `.exe` direto da página de [Releases](https://github.com/LucasDpaulo/sussa/releases). Os scripts são curtos e podem ser lidos antes: [`install.sh`](install.sh) e [`install.ps1`](install.ps1).
-
-</details>
-
-## Rodar a partir do código
-
-Requer **Node.js 22 ou posterior** e npm.
+Instale **Git** e **Node.js 22 ou posterior**. Os comandos abaixo funcionam no terminal do Linux e no PowerShell do Windows:
 
 ```sh
 git clone https://github.com/LucasDpaulo/sussa.git
 cd sussa
 npm ci
+npm run desktop
 ```
+
+Para atualizar, feche o aplicativo e execute na pasta do projeto:
+
+```sh
+git pull --ff-only origin main
+npm ci
+npm run desktop
+```
+
+Se você modifica o código localmente, preserve suas alterações antes de atualizar.
 
 | Comando | O que faz |
 |---|---|
-| `npm start` | Versão de navegador em http://127.0.0.1:5173 (não precisa de `npm ci`) |
+| `npm start` | Versão de navegador em http://127.0.0.1:5173 |
 | `npm run desktop` | Abre o app desktop (Electron) |
 | `npm test` | Testes de lógica, áudio e persistência |
-| `npm run test:desktop` | Teste ponta a ponta do app desktop (requer sessão gráfica) |
-| `npm run pack:linux` | Gera `.deb` e AppImage em `release/` |
-| `npm run pack:windows` | Gera o instalador `.exe` em `release/` (rodar no Windows) |
+| `npm run test:desktop` | Teste do app desktop (requer sessão gráfica) |
 
-O teste desktop usa um perfil temporário. Em ambientes isolados que bloqueiam o sandbox do Chromium, como containers e CI, use `npm run test:desktop -- --no-sandbox`. Isso vale só para o teste: no uso normal, o app roda com o sandbox ligado.
+O teste desktop usa um perfil temporário. Em containers e CI que bloqueiam o sandbox do Chromium, use `npm run test:desktop -- --no-sandbox`. No uso normal, o app roda com o sandbox ligado.
 
 ### Estrutura
 
@@ -221,22 +189,9 @@ Os commits seguem o padrão [Conventional Commits](https://www.conventionalcommi
 
 ## Versões
 
-O projeto segue [versionamento semântico](https://semver.org/lang/pt-BR/). Cada versão é uma tag `vX.Y.Z` igual ao `version` do `package.json`.
+O projeto segue versionamento semântico. A distribuição atual é pelo código da branch `main`, para Linux e Windows.
 
-Ao receber uma tag, o workflow [**Desktop packages**](.github/workflows/desktop.yml) roda os testes, gera o `.deb`, o AppImage e o `.exe` e cria uma **release em rascunho**, que só os mantenedores veem. Ela só fica pública, e só chega aos comandos de instalação, depois de publicada:
-
-Exemplo para a próxima versão, `0.3.6` (a atual é `0.3.5`):
-
-```sh
-npm version 0.3.6 --no-git-tag-version   # atualiza package.json e package-lock.json
-git commit -am "chore: release v0.3.6"
-git tag v0.3.6
-git push origin main v0.3.6
-# depois de testar o rascunho em Releases:
-gh release edit v0.3.6 --draft=false
-```
-
-Tags com sufixo, como `v0.3.6-beta.1`, viram **pre-release**: ficam públicas para quem quiser testar, mas os instaladores só as usam quando você informa a versão em `SUSSA_VERSION`.
+O workflow [Desktop checks](.github/workflows/desktop.yml) executa os testes nas duas plataformas, sem gerar instaladores ou criar releases. As releases publicadas anteriormente continuam disponíveis como histórico.
 
 ## Créditos
 
