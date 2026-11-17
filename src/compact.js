@@ -26,9 +26,26 @@ export function initCompact({ toast, state }) {
   function updateCaption() {
     if (!active) return;
     const prefs = state.workspace;
+    syncVideoControl();
     title.textContent = prefs.scene === 'youtube' ? prefs.videoTitle || 'YouTube' : prefs.scene === 'forest' ? 'Trilha na floresta' : 'Fundo neutro';
     subtitle.textContent = `${{focus:'Foco',short:'Pausa curta',long:'Pausa longa'}[state.mode]} · ${state.room === 'work' ? 'Trabalho' : 'Estudos'}`;
   }
+
+  const videoToggle = document.createElement('button');
+  videoToggle.id = 'compact-video-toggle';
+  videoToggle.type = 'button';
+  videoToggle.hidden = true;
+  document.body.append(videoToggle);
+  const syncVideoControl = () => {
+    const source = $('#bar-play');
+    videoToggle.hidden = !active || state.workspace.scene !== 'youtube';
+    videoToggle.innerHTML = source?.innerHTML || 'Ⅱ';
+    videoToggle.title = source?.title || 'Pausar vídeo';
+    videoToggle.setAttribute('aria-label', videoToggle.title);
+    document.body.classList.toggle('compact-has-video', active && state.workspace.scene === 'youtube');
+  };
+  videoToggle.onclick = () => { $('#bar-play')?.click(); syncVideoControl(); };
+  if ($('#bar-play')) new MutationObserver(syncVideoControl).observe($('#bar-play'), { childList:true, attributes:true, attributeFilter:['title'] });
 
   let snapshot = null, active = false, pinned = false, busy = false;
   function prepare() {
@@ -53,7 +70,7 @@ export function initCompact({ toast, state }) {
       document.dispatchEvent(new Event('workspace:notice'));
       enter.focus({ preventScroll: true });
     }
-    tools.hidden = !active; caption.hidden = !active; updateCaption();
+    tools.hidden = !active; caption.hidden = !active; updateCaption(); syncVideoControl();
     $('#compact-pin').setAttribute('aria-pressed', String(pinned));
     $('#compact-pin').disabled = state.pinSupported === false;
     $('#compact-pin').title = state.pinSupported === false ? 'Fixação indisponível no Wayland nativo; reabra o aplicativo pelo atalho instalado.' : pinned ? 'Desativar sempre à frente' : 'Sempre à frente';

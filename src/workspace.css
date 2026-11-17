@@ -577,3 +577,30 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 .workspace.compact-mode #compact-caption strong{font-size:10px}
 .workspace.compact-mode #compact-caption span{display:none}
 }
+/* Faixa mínima: vídeo à esquerda e tempo junto dos controles. */
+#compact-video-toggle{display:none}
+@media(max-height:160px){
+.workspace.compact-mode #compact-caption{display:none!important}
+.workspace.compact-mode #workspace-ui>#viewport-1-winner-hero>.timer-body{padding:26px 10px 0}
+.workspace.compact-mode #viewport-1-winner-hero .timer-row{grid-template-columns:minmax(0,1fr) 32px 24px;gap:8px}
+.workspace.compact-mode #viewport-1-winner-hero #clock{text-align:right;padding-right:2px}
+.workspace.compact-mode.compact-has-video #scene{display:block!important;inset:10px auto auto 10px;width:64px;height:52px;z-index:600;border-radius:6px;overflow:hidden;-webkit-app-region:no-drag}
+.workspace.compact-mode.compact-has-video #scene-youtube iframe{width:100%!important;height:100%!important;left:0!important;top:0!important;transform:none!important}
+.workspace.compact-mode.compact-has-video #workspace-ui>#viewport-1-winner-hero>.timer-body{padding-left:82px}
+.workspace.compact-mode.compact-has-video #compact-video-toggle:not([hidden]){display:flex;position:fixed;left:10px;top:10px;width:64px;height:52px;z-index:601;align-items:center;justify-content:center;padding:0;border:0;border-radius:6px;background:#0008;color:white;opacity:0;cursor:pointer;-webkit-app-region:no-drag}
+.workspace.compact-mode.compact-has-video #compact-video-toggle:hover,.workspace.compact-mode.compact-has-video #compact-video-toggle:focus-visible{opacity:1}
+}
+/* Picture-in-picture maior: vídeo inteiro com controles sobrepostos. */
+@media(min-height:161px){
+.workspace.compact-mode{--mini-footer:0px}
+.workspace.compact-mode #scene{inset:0}
+.workspace.compact-mode #workspace-ui>#viewport-1-winner-hero{inset:0!important;height:100%!important;border:0!important;background:transparent!important;pointer-events:none}
+.workspace.compact-mode #workspace-ui>#viewport-1-winner-hero>.timer-body{height:100%;padding:0!important;margin:0!important}
+.workspace.compact-mode #viewport-1-winner-hero .timer-row{display:block;height:100%;position:relative}
+.workspace.compact-mode #viewport-1-winner-hero #clock{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:clamp(40px,12vw,76px);line-height:1.1;font-weight:600;letter-spacing:-2px;text-shadow:0 2px 18px #000b,0 1px 4px #000a;pointer-events:auto;-webkit-app-region:drag}
+.workspace.compact-mode #viewport-1-winner-hero #toggle-timer{position:absolute;left:calc(50% - 38px);bottom:18px;width:40px;height:40px;pointer-events:auto;background:#171b207d;color:#fff;backdrop-filter:blur(12px);border:1px solid #ffffff40;box-shadow:0 2px 12px #0003}
+.workspace.compact-mode #viewport-1-winner-hero #reset{position:absolute;left:calc(50% + 12px);bottom:24px;pointer-events:auto;color:#fff;background:#171b207d;border-radius:50%;backdrop-filter:blur(12px);text-shadow:0 1px 3px #000}
+.workspace.compact-mode #viewport-1-winner-hero #timer-progress{display:none}
+.workspace.compact-mode #compact-caption{display:none!important}
+.workspace.compact-mode #scene-bar{bottom:72px}
+}
