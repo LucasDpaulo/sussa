@@ -95,7 +95,7 @@ else {
       if (!file.startsWith(root + path.sep)) return new Response('Não encontrado', { status: 404 });
       const response = await net.fetch(pathToFileURL(file).href);
       const headers = new Headers(response.headers);
-      headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://i.ytimg.com; media-src 'self' blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://embed.music.apple.com; connect-src 'self'; object-src 'none'; base-uri 'none'");
+      headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://i.ytimg.com; media-src 'self' blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https://embed.music.apple.com; connect-src 'self'; object-src 'none'; base-uri 'none'");
       return new Response(response.body, { status: response.status, headers });
     });
     function trusted(event) { return event.senderFrame === window?.webContents.mainFrame && event.senderFrame.url === origin + '/'; }

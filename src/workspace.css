@@ -604,3 +604,129 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 .workspace.compact-mode #compact-caption{display:none!important}
 .workspace.compact-mode #scene-bar{bottom:72px}
 }
+/* Acabamentos selecionáveis: vidro translúcido com brilho de borda. */
+.workspace[data-surface-style=glass]{
+--glass-fill:linear-gradient(145deg,#ffffff1c,#ffffff05 45%,#ffffff0c);
+--glass-shadow:inset 0 1px 0 #ffffff45,inset 0 -1px 0 #ffffff0c;
+--frosted-fill:linear-gradient(145deg,#ffffff10,#ffffff03 55%);
+--frosted-base:#272d38a8;
+}
+.workspace[data-surface-style=glass] #workspace-ui>.floating-panel,
+.workspace[data-surface-style=glass] #workspace-ui>#viewport-1-winner-nav,
+.workspace[data-surface-style=glass] dialog,
+.workspace[data-surface-style=glass] .top-group,
+.workspace[data-surface-style=glass] #timer-config #settings-form,
+.workspace[data-surface-style=glass] .info-popover,
+.workspace[data-surface-style=glass] #scene-bar,
+.workspace[data-surface-style=glass] #compact-tools{
+background-color:var(--frosted-base)!important;
+background-image:var(--frosted-fill)!important;
+background-size:100% 100%!important;
+background-repeat:no-repeat!important;
+border:1px solid #ffffff30!important;
+box-shadow:var(--glass-shadow)!important;
+backdrop-filter:blur(32px) saturate(115%);
+-webkit-backdrop-filter:blur(32px) saturate(115%);
+}
+.workspace[data-surface-style=glass] dialog::backdrop{background:#090b1040;backdrop-filter:blur(3px)}
+.workspace[data-surface-style=glass] button:hover{background-color:#ffffff20}
+.workspace[data-surface-style=glass] #viewport-1-winner-hero #toggle-timer,
+.workspace[data-surface-style=glass] #viewport-1-winner-hero #reset{
+box-shadow:var(--glass-shadow);border:1px solid #ffffff38;
+}
+@media(min-height:161px){
+.workspace.compact-mode[data-surface-style=glass] #workspace-ui>#viewport-1-winner-hero{
+background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+.workspace.compact-mode[data-surface-style=glass] #viewport-1-winner-hero #toggle-timer,
+.workspace.compact-mode[data-surface-style=glass] #viewport-1-winner-hero #reset{
+background:var(--glass-fill),#20263050;backdrop-filter:blur(18px) saturate(150%);border:1px solid #ffffff45;box-shadow:var(--glass-shadow)
+}
+.workspace.compact-mode #scene-bar{opacity:0!important;pointer-events:none!important}
+.workspace.compact-mode #scene-bar:focus-within{opacity:1!important;pointer-events:auto!important}
+}
+@media(max-height:160px){
+.workspace.compact-mode.compact-has-video #scene{left:0;top:0;height:100dvh;width:96px;border-radius:0 8px 8px 0}
+.workspace.compact-mode.compact-has-video #compact-video-toggle:not([hidden]){left:0;top:0;height:100dvh;width:96px;border-radius:0 8px 8px 0}
+.workspace.compact-mode.compact-has-video #workspace-ui>#viewport-1-winner-hero>.timer-body{padding-left:104px}
+}
+@media(prefers-reduced-transparency:reduce){
+.workspace[data-surface-style=glass]{--glass-fill:linear-gradient(#292f39,#292f39)}
+}
+
+.workspace[data-surface-style=glass] .liquid-surface{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Indicador contínuo acompanha a troca de etapa do timer. */
+.workspace .mode-tabs{position:relative;isolation:isolate;--mode-index:0}
+.workspace .mode-tabs:has([data-mode=short].active){--mode-index:1}
+.workspace .mode-tabs:has([data-mode=long].active){--mode-index:2}
+.workspace .mode-tabs::before{content:'';position:absolute;left:3px;top:3px;bottom:3px;width:calc((100% - 10px)/3);border-radius:8px;background:#ffffff1c;box-shadow:inset 0 1px 0 #ffffff14,0 1px 4px #0003;transform:translateX(calc(var(--mode-index)* (100% + 2px)));transition:transform 320ms cubic-bezier(.22,.8,.25,1),background 220ms,box-shadow 220ms;pointer-events:none;z-index:-1}
+.workspace .mode-tabs button.active{background:transparent!important;box-shadow:none!important}
+.workspace .mode-tabs button{transition:color 180ms}
+.workspace[data-surface-style=glass] .mode-tabs::before{background:linear-gradient(135deg,#ffffff40,#ffffff12);border:1px solid #ffffff38;box-sizing:border-box;box-shadow:inset 0 1px 0 #ffffff66,inset 0 -1px 0 #ffffff12;backdrop-filter:blur(10px) saturate(150%)}
+@media(prefers-reduced-motion:reduce){.workspace .mode-tabs::before,.workspace .mode-tabs button{transition:none}}
+/* Configurações: superfície sólida, movimento restrito aos controles. */
+.workspace[data-surface-style] #settings{background:#292d34!important;background-image:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 24px 90px #0006!important;border:1px solid #ffffff26!important}
+.workspace #settings #auto-hide{width:48px;min-width:48px;height:28px;background:#c64b54;border:1px solid #ffffff26;box-shadow:inset 0 1px 4px #0003;transition:background 280ms}
+.workspace #settings #auto-hide:checked{background:#37b968}
+.workspace #settings #auto-hide::after{left:3px;top:3px;width:20px;height:20px;background:#f7f8fa;transform:translateX(0);transition:transform 340ms cubic-bezier(.2,.85,.25,1.15),width 160ms,background 220ms;box-shadow:0 2px 5px #0003}
+.workspace #settings #auto-hide:checked::after{transform:translateX(20px)}
+.workspace[data-surface-style=glass] #settings #auto-hide::after{background:linear-gradient(140deg,#ffffffb8,#ffffff30 48%,#ffffff70);border:1px solid #ffffffb0;box-sizing:border-box;box-shadow:inset 0 1px 2px #fff,inset 0 -2px 3px #ffffff60,0 2px 6px #0003;backdrop-filter:blur(3px)}
+.workspace #settings #auto-hide:active::after{width:25px}
+.workspace #settings #auto-hide:checked:active::after{transform:translateX(15px)}
+.workspace #settings #auto-hide:focus-visible{outline:2px solid #a8caff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.workspace #settings #auto-hide,.workspace #settings #auto-hide::after{transition:none}}
+.workspace[data-surface-style=glass] .liquid-surface{pointer-events:auto!important}
+
+/* Os cabeçalhos compartilham o vidro dos próprios painéis. */
+.workspace[data-surface-style=glass] .floating-panel>.window-handle{
+background:transparent;
+border-bottom-color:#ffffff20;
+}
+
+.workspace[data-surface-style=glass] #viewport-1-winner-hero #toggle-timer:hover{
+background:#ffffff20;
+border-color:#ffffff60;
+}
+
+/* Controles do timer sem a sombra escura do acabamento sólido. */
+.workspace[data-surface-style=glass] #viewport-1-winner-hero :is(#toggle-timer,#reset){
+box-shadow:inset 0 1px 0 #ffffff45,inset 0 -1px 0 #ffffff0c;
+text-shadow:none;
+}
+
+.workspace[data-surface-style=glass] :is(#settings,.room-menu){
+background-color:var(--frosted-base)!important;
+background-image:var(--frosted-fill)!important;
+box-shadow:var(--glass-shadow)!important;
+backdrop-filter:blur(32px) saturate(115%)!important;
+-webkit-backdrop-filter:blur(32px) saturate(115%)!important;
+}
+
+/* Lentes WebGL do motor ybouane, preservando os controles e seus eventos. */
+#liquid-compositor{position:fixed;inset:0;opacity:0;pointer-events:none;z-index:-1;overflow:hidden}
+.workspace[data-surface-style=glass] .liquid-surface{isolation:isolate;box-shadow:none!important}
+.workspace .liquid-relative{position:relative}
+.workspace[data-surface-style=glass] .liquid-surface>.liquid-canvas-host{display:block;position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:-1;margin:0!important;padding:0!important;border:0!important}
+.workspace .liquid-output{margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important}
+.workspace[data-surface-style=glass] :is(#settings,.room-menu).liquid-surface{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.workspace .liquid-mode-indicator{position:absolute;left:0;top:var(--selection-top,3px);height:var(--selection-height,34px);width:var(--selection-width,calc((100% - 10px)/3));border-radius:999px;transform:translateX(var(--selection-left,3px)) scale(var(--liquid-stretch,1),var(--liquid-height,1));transform-origin:center;transition:transform 420ms cubic-bezier(.18,.85,.25,1.12),width 380ms cubic-bezier(.22,.8,.25,1);pointer-events:none;z-index:-1}
+.workspace[data-surface-style=glass] .liquid-mode-indicator{background:linear-gradient(135deg,#ffffff30,#ffffff04 38%,#ffffff08 65%,#ffffff20);border:1px solid #ffffff70;box-shadow:inset 0 1px 1px #ffffffa0,inset 1px 0 1px #ffffff40,inset 0 -1px 1px #ffffff45;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.workspace[data-surface-style=glass] .mode-tabs{touch-action:pan-y;user-select:none}
+.workspace[data-surface-style=glass] .mode-tabs button.active{cursor:grab}
+.workspace[data-surface-style=glass] .mode-tabs.liquid-held{--liquid-stretch:1.08;--liquid-height:.92;cursor:grabbing}
+.workspace[data-surface-style=glass] .mode-tabs.liquid-held button{cursor:grabbing}
+.workspace[data-surface-style=glass] .mode-tabs.liquid-held .liquid-mode-indicator{border-color:#ffffffaa;filter:brightness(1.14)}
+.workspace[data-surface-style=glass] .mode-tabs.liquid-dragging .liquid-mode-indicator{transition:transform 45ms linear,width 120ms ease}
+.workspace[data-surface-style=glass] .mode-tabs:has(.liquid-mode-indicator)::before{display:none}
+.workspace[data-surface-style=glass] .mode-tabs{background:none;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.workspace[data-surface-style=glass] .mode-tabs button{background:transparent!important;border:0;box-shadow:none!important}
+.workspace #settings>label:has(#auto-hide){position:relative}
+.workspace .liquid-switch-thumb{position:absolute;right:23px;top:calc(50% - 10px);width:20px;height:20px;border-radius:50%;transform:translateX(0);pointer-events:none;transition:transform 340ms cubic-bezier(.2,.85,.25,1.15)}
+.workspace #auto-hide:checked+.liquid-switch-thumb{transform:translateX(20px)}
+.workspace[data-surface-style=glass] .liquid-switch-thumb.liquid-surface,.workspace[data-surface-style=glass] .liquid-mode-indicator.liquid-surface{pointer-events:none!important}
+.workspace #settings label:has(.liquid-switch-thumb.liquid-surface) #auto-hide::after{visibility:hidden}
+@media(prefers-reduced-motion:reduce){.workspace .liquid-mode-indicator,.workspace .liquid-switch-thumb{transition:none}}
+@media(prefers-reduced-transparency:reduce){
+.workspace[data-surface-style=glass]{--frosted-base:#292f39;--frosted-fill:linear-gradient(#292f39,#292f39)}
+.workspace[data-surface-style=glass] .liquid-mode-indicator{background:#586273;backdrop-filter:none;-webkit-backdrop-filter:none}
+}

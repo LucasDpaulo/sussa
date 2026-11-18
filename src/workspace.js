@@ -1,3 +1,4 @@
+import { initLiquidGlass } from './liquid-glass.js';
 import { embedUrl } from './core.js';
 import { initYouTubeCatalog } from './youtube.js';
 import { initSceneBar } from './scene-bar.js';
@@ -12,7 +13,9 @@ const labels = { hero:'Pomodoro', tasks:'Tarefas', notes:'Notas', sound:'Sons', 
 
 export function initWorkspace({state, save, toast}) {
   document.body.classList.add('workspace');
-  const preferences = state.workspace = { autoHide:true, hideAfter:5, scene:'forest', videoUrl:'', backgroundVolume:0, positions:{}, sizes:{}, open:['hero'], ...state.workspace };
+  const preferences = state.workspace = { surfaceStyle:'solid', autoHide:true, hideAfter:5, scene:'forest', videoUrl:'', backgroundVolume:0, positions:{}, sizes:{}, open:['hero'], ...state.workspace };
+  preferences.surfaceStyle = preferences.surfaceStyle === 'glass' ? 'glass' : 'solid';
+  document.body.dataset.surfaceStyle = preferences.surfaceStyle;
   preferences.sizes = preferences.sizes?.player ? { player: preferences.sizes.player } : {};
   preferences.hideAfter = Math.min(120, Math.max(2, Number(preferences.hideAfter) || 5));
   const root = $('#viewport-1-winner'); root.id = 'workspace-ui';
@@ -43,7 +46,7 @@ export function initWorkspace({state, save, toast}) {
 
   document.body.insertAdjacentHTML('afterbegin', `<div id="scene" aria-hidden="true"><div id="scene-image"></div><div id="scene-youtube" hidden></div></div>`);
   const bar = document.createElement('div');bar.id='workspace-bar';bar.className='workspace-chrome';
-  bar.innerHTML = `<div class="top-group"><span class="workspace-name">◌ Sussa</span><button id="stats-shortcut" aria-label="Abrir estatísticas" aria-controls="viewport-1-winner-stats"><span id="focus-count">0</span><span aria-hidden="true">🔥</span></button></div><div class="top-group"><label class="room-select-label">Sala <select id="workspace-room" aria-label="Sala de foco"><option value="study">Estudos</option><option value="work">Trabalho</option></select></label><button id="fullscreen" aria-label="Tela cheia" title="Tela cheia">⛶</button><button id="appearance" aria-label="Aparência" title="Aparência e modo foco">⚙</button></div>`;
+  bar.innerHTML = `<div class="top-group"><span class="workspace-name">◌ Sussa</span><label class="room-select-label">Sala <select id="workspace-room" aria-label="Sala de foco"><option value="study">Estudos</option><option value="work">Trabalho</option></select></label><button id="stats-shortcut" aria-label="Abrir estatísticas" aria-controls="viewport-1-winner-stats"><span id="focus-count">0</span><span aria-hidden="true">🔥</span></button></div><div class="top-group"><button id="fullscreen" aria-label="Tela cheia" title="Tela cheia">⛶</button><button id="appearance" aria-label="Aparência" title="Aparência e modo foco">⚙</button></div>`;
   document.body.append(bar);
   $('#workspace-room').value=state.room;
   $('#workspace-room').onchange=e=>{roomButtons.find(b=>b.dataset.room===e.target.value).click();e.target.blur();wake();};
@@ -54,12 +57,18 @@ export function initWorkspace({state, save, toast}) {
   spaces.innerHTML=`<div class="panel-content"><h2>Seu ambiente</h2><p class="hint">Escolha um vídeo do YouTube para o fundo ou uma imagem que funciona sem internet. O vídeo é controlado pela barra no rodapé da tela.</p><div id="youtube-slot"></div><p id="scene-now" hidden></p><p class="scene-section">Sem internet</p><div class="scene-options"><button id="forest-scene" class="scene-card" aria-pressed="false"><img src="/assets/forest-trail.webp" alt=""><span>Trilha na floresta</span></button><button id="neutral-scene" class="scene-card" aria-pressed="false"><i class="neutral-preview"></i><span>Fundo neutro</span></button></div><p id="scene-status" role="status"></p><small>Foto: <a href="https://unsplash.com/photos/a-dirt-path-in-the-middle-of-a-forest-GJJdGDsoomU" target="_blank" rel="noopener">Anton Sobotyak / Unsplash ↗</a></small></div>`;
   root.append(spaces);
   const settings=$('#settings');
-  settings.innerHTML=`<header><h2>Aparência e foco</h2><button data-close aria-label="Fechar">×</button></header><p>Painéis escuros sobre o seu ambiente.</p><label>Ocultar barras<input id="auto-hide" type="checkbox" ${preferences.autoHide?'checked':''}></label><label>Tempo de espera (s)<input id="hide-after" type="number" min="2" max="120" value="${preferences.hideAfter}"></label><p class="hint">As barras superior e lateral somem após a espera. Os painéis abertos continuam visíveis. Mova o mouse, toque na tela ou pressione uma tecla para mostrar as barras novamente.</p><button id="reset-layout">Restaurar posições</button><hr><button id="notify">Ativar notificações</button>`;
+  settings.innerHTML=`<header><h2>Aparência e foco</h2><button data-close aria-label="Fechar">×</button></header><p>Escolha o acabamento dos painéis e controles.</p><label>Visual<select id="surface-style"><option value="solid">Sólido</option><option value="glass">Glass</option></select></label><label>Ocultar barras<input id="auto-hide" type="checkbox" ${preferences.autoHide?'checked':''}></label><label>Tempo de espera (s)<input id="hide-after" type="number" min="2" max="120" value="${preferences.hideAfter}"></label><p class="hint">As barras superior e lateral somem após a espera. Os painéis abertos continuam visíveis. Mova o mouse, toque na tela ou pressione uma tecla para mostrar as barras novamente.</p><button id="reset-layout">Restaurar posições</button><hr><button id="notify">Ativar notificações</button>`;
   settings.querySelector('[data-close]').onclick=()=>settings.close();
   $('#notify').onclick=async()=>{if(!('Notification'in window))return toast('Este navegador não oferece notificações.');toast(await Notification.requestPermission()==='granted'?'Avisos ativados.':'Avisos não autorizados.');};
   if(window.desktopApp){const data=document.createElement('button');data.id='open-data';data.type='button';data.textContent='Abrir pasta dos dados';data.onclick=()=>window.desktopApp.openDataFolder();$('#notify').after(data);}
   initGoogleAccount({toast});
   $('#appearance').onclick=()=>{wake();settings.showModal();};
+  $('#surface-style').value=preferences.surfaceStyle;
+  $('#surface-style').onchange=e=>{
+    preferences.surfaceStyle=e.target.value==='glass'?'glass':'solid';
+    document.body.dataset.surfaceStyle=preferences.surfaceStyle;
+    save();
+  };
   $('#auto-hide').onchange=e=>{preferences.autoHide=e.target.checked;save();wake();};
   $('#hide-after').onchange=e=>{preferences.hideAfter=Math.min(120,Math.max(2,Number(e.target.value)||5));e.target.value=preferences.hideAfter;save();wake();};
   $('#fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{toast('Não foi possível ativar a tela cheia.');}};
@@ -216,6 +225,7 @@ export function initWorkspace({state, save, toast}) {
   }});
   document.querySelectorAll('dialog [data-close]').forEach(button=>{button.classList.add('close-button');button.innerHTML=icon('close');});
   initDialogs();
+  initLiquidGlass();
   initContextHelp();
   initRoomMenu();
   document.addEventListener('keydown',e=>{
