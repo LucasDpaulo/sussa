@@ -19,7 +19,7 @@ export function initGoogleAccount({ toast }) {
   if (!bridge || !settings) return;
   const section = document.createElement('section');
   section.id = 'google-account';
-  section.innerHTML = `<hr><h3>Conta Google</h3><p id="google-state"></p>
+  section.innerHTML = `<hr><h3>Conta Google</h3><p id="google-state" role="status"></p>
     ${services.map(([id, title, detail]) => `<div class="google-service" data-service="${id}"><div><b>${title}</b><small>${detail}</small></div><button type="button" data-connect="${id}">Conectar</button></div>`).join('')}
     <button type="button" id="google-disconnect">Desconectar conta</button>
     <details id="google-setup"><summary>Credenciais próprias do Google Cloud</summary>
@@ -38,8 +38,8 @@ export function initGoogleAccount({ toast }) {
       : 'Para conectar, informe as credenciais do Google Cloud abaixo.';
     for (const [id] of services) {
       const on = Boolean(status[id]), button = $(`[data-connect="${id}"]`);
-      button.textContent = on ? '✓ Conectado' : 'Conectar';
-      button.disabled = on || !status.configured;
+      button.textContent = on ? '✓ Conectado' : status.configured ? 'Conectar' : 'Configurar conexão';
+      button.disabled = on;
       button.classList.toggle('primary', !on && status.configured);
     }
     $('#google-disconnect').hidden = !status.connected;
@@ -53,18 +53,23 @@ export function initGoogleAccount({ toast }) {
   section.addEventListener('click', async event => {
     const service = event.target.closest('[data-connect]')?.dataset.connect;
     if (!service) return;
+    if (!current.configured) {
+      $('#google-setup').open = true;
+      $('#google-id').focus();
+      return;
+    }
     const button = event.target.closest('button');
     button.disabled = true; button.textContent = 'Continue no navegador…';
     try { update(await bridge.connect(service)); toast(`${service === 'calendar' ? 'Agenda' : 'YouTube'} conectado.`); }
-    catch (error) { render(current); toast(cleanError(error)); }
+    catch (error) { render(current); $('#google-state').textContent = cleanError(error); }
   });
   $('#google-save').onclick = async () => {
     try { update(await bridge.configure({ id: $('#google-id').value, secret: $('#google-secret').value })); $('#google-secret').value = ''; toast('Credenciais salvas. Agora conecte a Agenda ou o YouTube.'); }
-    catch (error) { toast(cleanError(error)); }
+    catch (error) { $('#google-state').textContent = cleanError(error); }
   };
   $('#google-disconnect').onclick = async () => {
     try { update(await bridge.disconnect()); toast('Conta Google desconectada.'); }
-    catch (error) { toast(cleanError(error)); }
+    catch (error) { $('#google-state').textContent = cleanError(error); }
   };
-  bridge.status().then(update).catch(() => {});
+  bridge.status().then(update).catch(error => { $('#google-state').textContent = cleanError(error); });
 }
