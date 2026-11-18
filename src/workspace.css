@@ -773,3 +773,24 @@ html:has(body.workspace)::-webkit-scrollbar,body.workspace::-webkit-scrollbar,.w
 /* Largura suficiente para os rótulos completos da navegação. */
 .workspace #workspace-ui>#viewport-1-winner-nav{width:78px!important;overflow-x:hidden}
 .workspace #viewport-1-winner-nav button{font-size:10px;letter-spacing:-.15px;padding-inline:2px;white-space:normal;overflow-wrap:normal;min-width:0}
+
+.workspace #yt-link-form label{display:block;margin-bottom:8px}
+.workspace #yt-link-form div{display:flex;gap:8px}
+.workspace #yt-link-url{flex:1;min-width:0}
+
+.workspace[data-surface-style=glass] #open-youtube{color:var(--ui-text,#f4f6fa)}
+
+/* Alça da janela compacta, acima do relógio e abaixo da linha de progresso. */
+.workspace.compact-mode::after {
+  content: '';
+  position: fixed;
+  z-index: 602;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 20px;
+  background: linear-gradient(#bfc3ca, #bfc3ca) center / 28px 3px no-repeat;
+  pointer-events: auto;
+  -webkit-app-region: drag;
+}

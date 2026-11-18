@@ -10,7 +10,8 @@ const REGULAR_GLASS = Object.freeze({
 });
 
 export function initLiquidGlass() {
-  const targets = 'button:not(.liquid-tabs button):not(.scene-card):not(.yt-card):not(.resize-grip),.liquid-mode-indicator,.liquid-switch-thumb';
+  // Os botões usam o vidro do CSS. A lente acompanha apenas os indicadores móveis.
+  const targets = '.liquid-mode-indicator,.liquid-switch-thumb';
   let instance, root, pairs = [], timer, frame, building = false, queued = false;
   const reduced = matchMedia('(prefers-reduced-transparency: reduce)');
 

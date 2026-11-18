@@ -1,3 +1,4 @@
+import { embedUrl } from './core.js';
 import { categories, pickVideos } from './youtube-catalog.js';
 import { googleStatus, cleanError } from './google-account.js';
 
@@ -13,7 +14,7 @@ const account = { id: 'account', title: 'Sua conta', music: true };
 
 export function initYouTubeCatalog({ preferences, save, toast, play }) {
   const prefs = preferences.youtube = { category: 'study', period: 'all', collection: 'liked', ...preferences.youtube };
-  if (![...categories, account].some(c => c.id === prefs.category)) prefs.category = 'study';
+  if (prefs.category !== 'link' && ![...categories, account].some(c => c.id === prefs.category)) prefs.category = 'study';
   const feeds = new Map(), collections = new Map();
   let library = null;
   let request = 0;
@@ -23,14 +24,43 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
   const dialog = document.createElement('dialog');
   dialog.id = 'youtube-catalog';
   dialog.innerHTML = `<header><h2>Explorar YouTube</h2><button data-close aria-label="Fechar">×</button></header>
-    <div class="yt-filters"><div class="yt-tabs" role="group" aria-label="Categoria"><button type="button" data-yt-category="account" hidden>★ Sua conta</button>${categories.map(c => `<button type="button" data-yt-category="${c.id}">${c.title}</button>`).join('')}</div>
+    <div class="yt-filters"><div class="yt-tabs" role="group" aria-label="Categoria"><button type="button" data-yt-category="account" hidden>★ Sua conta</button>${categories.map(c => `<button type="button" data-yt-category="${c.id}">${c.title}</button>`).join('')}<button type="button" data-yt-category="link">Link</button></div>
     <div class="yt-tabs yt-period" role="group" aria-label="Período">${periods.map(([id, label]) => `<button type="button" data-yt-period="${id}">${label}</button>`).join('')}</div></div>
     <div class="yt-tabs yt-account" role="group" aria-label="Coleção" hidden></div>
+    <form id="yt-link-form" hidden>
+      <label for="yt-link-url">Link do vídeo do YouTube</label>
+      <div><input id="yt-link-url" type="url" placeholder="Cole o link do vídeo" required><button class="primary" type="submit">Salvar</button></div>
+    </form>
     <p id="yt-status" role="status"></p><div id="yt-grid"></div><button type="button" id="yt-more" hidden>Carregar mais vídeos</button>
     <p class="hint">Os vídeos tocam como fundo pelo player oficial do YouTube e podem exibir anúncios. O som, a pausa e o enquadramento ficam na barra do rodapé da tela.</p>`;
   document.body.append(dialog);
   const $ = selector => dialog.querySelector(selector);
   const grid = $('#yt-grid');
+  const linkForm = $('#yt-link-form');
+  const linkInput = $('#yt-link-url');
+  linkInput.value = prefs.savedLink || '';
+  linkInput.oninput = () => linkInput.setCustomValidity('');
+  linkForm.onsubmit = async event => {
+    event.preventDefault();
+    const value = linkInput.value.trim();
+    const url = embedUrl(value);
+    if (!url?.startsWith('https://www.youtube-nocookie.com/embed/')) {
+      linkInput.setCustomValidity('Cole um link de vídeo do YouTube.');
+      linkInput.reportValidity();
+      return;
+    }
+    const id = url.split('/').pop();
+    const current = request;
+    const allowed = await api.embeddable(id).catch(() => true);
+    if (!dialog.open || current !== request || value !== linkInput.value.trim()) return;
+    if (!allowed) {
+      $('#yt-status').textContent = 'O autor não permite reproduzir este vídeo como fundo. Escolha outro link.';
+      return;
+    }
+    prefs.savedLink = value;
+    play({ id, title: 'Vídeo do seu link', channel: 'YouTube' }, { music: false });
+    dialog.close();
+  };
   function beginUpdate() {
     grid.inert = true;
     grid.setAttribute('aria-busy', 'true');
@@ -160,6 +190,15 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     dialog.scrollTop = 0;
     dialog.querySelectorAll('[data-yt-category]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ytCategory === prefs.category));
     $('.yt-account').hidden = true;
+    linkForm.hidden = prefs.category !== 'link';
+    if (!linkForm.hidden) {
+      $('.yt-period').hidden = true;
+      grid.replaceChildren();
+      finishUpdate();
+      $('#yt-status').textContent = '';
+      linkInput.focus();
+      return;
+    }
     if (prefs.category === 'account') { $('.yt-period').hidden = true; $('#yt-status').textContent = 'Carregando seus vídeos…'; return renderAccount(current); }
     const category = categories.find(c => c.id === prefs.category);
     dialog.querySelectorAll('[data-yt-category]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ytCategory === category.id));
