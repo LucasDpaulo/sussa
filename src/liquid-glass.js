@@ -3,20 +3,20 @@ import { LiquidGlass } from './vendor/ybouane-liquidglass.js';
 
 // Regular Glass: lente nítida; o acabamento fosco dos painéis fica no CSS.
 const REGULAR_GLASS = Object.freeze({
-  refraction: .8, blurAmount: 0, chromAberration: .04,
+  refraction: 1.35, blurAmount: 0, chromAberration: .06,
   edgeHighlight: .1, specular: .18, fresnel: .8,
   tintStrength: 0, brightness: .02, shadowOpacity: 0,
   shadowSpread: 0, shadowOffsetY: 0, floating: false
 });
 
 export function initLiquidGlass() {
-  const targets = 'button:not(.mode-tabs button):not(.scene-card):not(.yt-card):not(.resize-grip),.liquid-mode-indicator,.liquid-switch-thumb';
+  const targets = 'button:not(.liquid-tabs button):not(.scene-card):not(.yt-card):not(.resize-grip),.liquid-mode-indicator,.liquid-switch-thumb';
   let instance, root, pairs = [], timer, frame, building = false, queued = false;
   const reduced = matchMedia('(prefers-reduced-transparency: reduce)');
 
   function alignSelection(tabs) {
     if (tabs.classList.contains('liquid-held')) return;
-    const selected = tabs.querySelector('button.active');
+    const selected = tabs.querySelector('button.active,button[aria-pressed=true]');
     if (!selected) return;
     tabs.style.setProperty('--selection-left', `${selected.offsetLeft}px`);
     tabs.style.setProperty('--selection-top', `${selected.offsetTop}px`);
@@ -26,7 +26,8 @@ export function initLiquidGlass() {
 
   // O motor exige filhos diretos. As lentes ficam em uma cena de composição
   // separada; seus canvases são exibidos nos controles originais, sem movê-los.
-  document.querySelectorAll('.mode-tabs').forEach(tabs => {
+  document.querySelectorAll('.mode-tabs,.yt-tabs:not(.yt-account)').forEach(tabs => {
+    tabs.classList.add('liquid-tabs');
     const indicator = document.createElement('span');
     indicator.className = 'liquid-mode-indicator';
     indicator.setAttribute('aria-hidden', 'true');
@@ -34,15 +35,15 @@ export function initLiquidGlass() {
     alignSelection(tabs);
     new ResizeObserver(() => alignSelection(tabs)).observe(tabs);
     new MutationObserver(() => alignSelection(tabs)).observe(tabs, {
-      subtree: true, attributes: true, attributeFilter: ['class']
+      subtree: true, attributes: true, attributeFilter: ['class','aria-pressed','hidden']
     });
     let drag, suppressClick = false;
-    const buttons = [...tabs.querySelectorAll('button[data-mode]')];
     tabs.addEventListener('pointerdown', event => {
       if (document.body.dataset.surfaceStyle !== 'glass' || event.button !== 0) return;
-      const button = event.target.closest('button[data-mode].active');
+      const button = event.target.closest('button.active,button[aria-pressed=true]');
       if (!button) return;
-      drag = { id: event.pointerId, startX: event.clientX, left: button.offsetLeft, width: button.offsetWidth, moved: false, target: button };
+      const buttons = [...tabs.querySelectorAll('button')].filter(item => !item.hidden && item.offsetWidth);
+      drag = { id: event.pointerId, startX: event.clientX, left: button.offsetLeft, width: button.offsetWidth, moved: false, target: button, buttons };
       tabs.classList.add('liquid-held');
       tabs.setPointerCapture(event.pointerId);
       event.preventDefault();
@@ -52,6 +53,7 @@ export function initLiquidGlass() {
       const delta = event.clientX - drag.startX;
       drag.moved ||= Math.abs(delta) > 4;
       if (!drag.moved) return;
+      const buttons = drag.buttons;
       tabs.classList.add('liquid-dragging');
       const left = Math.max(buttons[0].offsetLeft, Math.min(buttons.at(-1).offsetLeft, drag.left + delta));
       tabs.style.setProperty('--selection-left', `${left}px`);
@@ -122,8 +124,11 @@ export function initLiquidGlass() {
         const selected = source.classList.contains('liquid-mode-indicator');
         lens.dataset.config = JSON.stringify({
           cornerRadius: radius,
-          zRadius: selected ? Math.min(16, rect.height / 2) : Math.max(5, Math.min(22, rect.height / 2, radius || 12)),
-          ...(selected ? { refraction: 1.15, edgeHighlight: .25, specular: .4, fresnel: 1, chromAberration: .07 } : {})
+          // Uma curvatura mais larga estende a refração da borda para dentro.
+          zRadius: selected
+            ? Math.min(32, rect.height * .8)
+            : Math.max(8, Math.min(30, Math.min(rect.width, rect.height) * .7)),
+          ...(selected ? { refraction: 1.8, edgeHighlight: .25, specular: .4, fresnel: 1, chromAberration: .09 } : {})
         });
         changed = true;
       }

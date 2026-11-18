@@ -606,10 +606,10 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 }
 /* Acabamentos selecionáveis: vidro translúcido com brilho de borda. */
 .workspace[data-surface-style=glass]{
---glass-fill:linear-gradient(145deg,#ffffff1c,#ffffff05 45%,#ffffff0c);
---glass-shadow:inset 0 1px 0 #ffffff45,inset 0 -1px 0 #ffffff0c;
---frosted-fill:linear-gradient(145deg,#ffffff10,#ffffff03 55%);
---frosted-base:#272d38a8;
+--glass-fill:linear-gradient(145deg,#ffffff0c,#ffffff02 45%,#ffffff06);
+--glass-shadow:inset 0 1px 0 #ffffff28,inset 0 -1px 0 #ffffff08;
+--frosted-fill:linear-gradient(145deg,#ffffff08,#ffffff01 55%);
+--frosted-base:#272d380d;
 }
 .workspace[data-surface-style=glass] #workspace-ui>.floating-panel,
 .workspace[data-surface-style=glass] #workspace-ui>#viewport-1-winner-nav,
@@ -623,10 +623,10 @@ background-color:var(--frosted-base)!important;
 background-image:var(--frosted-fill)!important;
 background-size:100% 100%!important;
 background-repeat:no-repeat!important;
-border:1px solid #ffffff30!important;
+border:1px solid #ffffff20!important;
 box-shadow:var(--glass-shadow)!important;
-backdrop-filter:blur(32px) saturate(115%);
--webkit-backdrop-filter:blur(32px) saturate(115%);
+backdrop-filter:blur(6px) saturate(110%);
+-webkit-backdrop-filter:blur(6px) saturate(110%);
 }
 .workspace[data-surface-style=glass] dialog::backdrop{background:#090b1040;backdrop-filter:blur(3px)}
 .workspace[data-surface-style=glass] button:hover{background-color:#ffffff20}
@@ -640,7 +640,7 @@ background:transparent!important;border:0!important;box-shadow:none!important;ba
 }
 .workspace.compact-mode[data-surface-style=glass] #viewport-1-winner-hero #toggle-timer,
 .workspace.compact-mode[data-surface-style=glass] #viewport-1-winner-hero #reset{
-background:var(--glass-fill),#20263050;backdrop-filter:blur(18px) saturate(150%);border:1px solid #ffffff45;box-shadow:var(--glass-shadow)
+background:var(--glass-fill),#2026300d;backdrop-filter:blur(4px) saturate(110%);border:1px solid #ffffff30;box-shadow:var(--glass-shadow)
 }
 .workspace.compact-mode #scene-bar{opacity:0!important;pointer-events:none!important}
 .workspace.compact-mode #scene-bar:focus-within{opacity:1!important;pointer-events:auto!important}
@@ -698,8 +698,8 @@ text-shadow:none;
 background-color:var(--frosted-base)!important;
 background-image:var(--frosted-fill)!important;
 box-shadow:var(--glass-shadow)!important;
-backdrop-filter:blur(32px) saturate(115%)!important;
--webkit-backdrop-filter:blur(32px) saturate(115%)!important;
+backdrop-filter:blur(6px) saturate(110%)!important;
+-webkit-backdrop-filter:blur(6px) saturate(110%)!important;
 }
 
 /* Lentes WebGL do motor ybouane, preservando os controles e seus eventos. */
@@ -710,7 +710,7 @@ backdrop-filter:blur(32px) saturate(115%)!important;
 .workspace .liquid-output{margin:0!important;padding:0!important;border:0!important;max-width:none!important;max-height:none!important}
 .workspace[data-surface-style=glass] :is(#settings,.room-menu).liquid-surface{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .workspace .liquid-mode-indicator{position:absolute;left:0;top:var(--selection-top,3px);height:var(--selection-height,34px);width:var(--selection-width,calc((100% - 10px)/3));border-radius:999px;transform:translateX(var(--selection-left,3px)) scale(var(--liquid-stretch,1),var(--liquid-height,1));transform-origin:center;transition:transform 420ms cubic-bezier(.18,.85,.25,1.12),width 380ms cubic-bezier(.22,.8,.25,1);pointer-events:none;z-index:-1}
-.workspace[data-surface-style=glass] .liquid-mode-indicator{background:linear-gradient(135deg,#ffffff30,#ffffff04 38%,#ffffff08 65%,#ffffff20);border:1px solid #ffffff70;box-shadow:inset 0 1px 1px #ffffffa0,inset 1px 0 1px #ffffff40,inset 0 -1px 1px #ffffff45;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.workspace[data-surface-style=glass] .liquid-mode-indicator{background:linear-gradient(135deg,#ffffff16,#ffffff02 38%,#ffffff04 65%,#ffffff0c);border:1px solid #ffffff50;box-shadow:inset 0 1px 1px #ffffff70,inset 1px 0 1px #ffffff28,inset 0 -1px 1px #ffffff30;backdrop-filter:blur(1px) saturate(125%);-webkit-backdrop-filter:blur(1px) saturate(125%)}
 .workspace[data-surface-style=glass] .mode-tabs{touch-action:pan-y;user-select:none}
 .workspace[data-surface-style=glass] .mode-tabs button.active{cursor:grab}
 .workspace[data-surface-style=glass] .mode-tabs.liquid-held{--liquid-stretch:1.08;--liquid-height:.92;cursor:grabbing}
@@ -725,8 +725,51 @@ backdrop-filter:blur(32px) saturate(115%)!important;
 .workspace #auto-hide:checked+.liquid-switch-thumb{transform:translateX(20px)}
 .workspace[data-surface-style=glass] .liquid-switch-thumb.liquid-surface,.workspace[data-surface-style=glass] .liquid-mode-indicator.liquid-surface{pointer-events:none!important}
 .workspace #settings label:has(.liquid-switch-thumb.liquid-surface) #auto-hide::after{visibility:hidden}
+/* Campos e grupos internos acompanham o acabamento claro dos painéis. */
+.workspace[data-surface-style=glass] :is(input:not([type=checkbox]):not([type=range]):not([type=file]),select,textarea){
+font-family:var(--ui-font);
+background:var(--glass-fill)!important;
+color:#f4f6fa;
+border-color:#ffffff30;
+box-shadow:var(--glass-shadow);
+}
+.workspace[data-surface-style=glass] :is(input,textarea)::placeholder{color:#d1d6e0;opacity:.85}
+.workspace[data-surface-style=glass] select option{background:#292f39;color:#f4f6fa}
+.workspace[data-surface-style=glass] button:where(:not(.mode-tabs button):not(.scene-card):not(.yt-card):not(.resize-grip):not(.liquid-surface):not(#workspace-bar .top-group:last-child button)){
+background:var(--glass-fill);
+color:#f4f6fa;
+border-color:#ffffff30;
+box-shadow:var(--glass-shadow);
+}
+.workspace[data-surface-style=glass] :is(.yt-tabs,.periods,#scene-now,#media-form){
+background:var(--glass-fill)!important;
+box-shadow:var(--glass-shadow);
+border-color:#ffffff20;
+}
+.workspace[data-surface-style=glass] :is(.room-menu-trigger,#note-body){background:var(--glass-fill)}
+.workspace[data-surface-style=glass] :is(.window-handle,.yt-title,.media-empty p,.empty p){font-family:var(--ui-font)}
+/* Contraste do conteúdo independente da transparência do painel. */
+.workspace[data-surface-style=glass] #workspace-ui>.floating-panel{
+--text:#f8faff;
+--muted:#edf1f8;
+color:var(--text);
+text-shadow:0 1px 2px #101522b3;
+}
+.workspace[data-surface-style=glass] #workspace-ui>.floating-panel :is(small,.hint,.empty,#chart-unit,#chart-scale,.bar-column>span,.stats-footer button){
+color:var(--muted);
+}
+.workspace[data-surface-style=glass] #viewport-1-winner-stats :is(#chart-scale,#chart-unit,.bar-column>span,.stats-summary small){font-weight:500}
+.workspace[data-surface-style=glass] #viewport-1-winner-stats .chart-heading{color:#f8faff}
 @media(prefers-reduced-motion:reduce){.workspace .liquid-mode-indicator,.workspace .liquid-switch-thumb{transition:none}}
 @media(prefers-reduced-transparency:reduce){
 .workspace[data-surface-style=glass]{--frosted-base:#292f39;--frosted-fill:linear-gradient(#292f39,#292f39)}
 .workspace[data-surface-style=glass] .liquid-mode-indicator{background:#586273;backdrop-filter:none;-webkit-backdrop-filter:none}
 }
+
+/* Mantém a rolagem dos conteúdos sem exibir trilhos ou alças. */
+html:has(body.workspace),body.workspace,.workspace *{scrollbar-width:none!important}
+html:has(body.workspace)::-webkit-scrollbar,body.workspace::-webkit-scrollbar,.workspace *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+
+/* Largura suficiente para os rótulos completos da navegação. */
+.workspace #workspace-ui>#viewport-1-winner-nav{width:78px!important;overflow-x:hidden}
+.workspace #viewport-1-winner-nav button{font-size:10px;letter-spacing:-.15px;padding-inline:2px;white-space:normal;overflow-wrap:normal;min-width:0}

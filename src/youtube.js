@@ -18,6 +18,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
   let library = null;
   let request = 0;
   let paging = null;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   const dialog = document.createElement('dialog');
   dialog.id = 'youtube-catalog';
@@ -29,6 +30,23 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     <p class="hint">Os vídeos tocam como fundo pelo player oficial do YouTube e podem exibir anúncios. O som, a pausa e o enquadramento ficam na barra do rodapé da tela.</p>`;
   document.body.append(dialog);
   const $ = selector => dialog.querySelector(selector);
+  const grid = $('#yt-grid');
+  function beginUpdate() {
+    grid.inert = true;
+    grid.setAttribute('aria-busy', 'true');
+    grid.classList.add('is-updating');
+  }
+  function finishUpdate() {
+    grid.inert = false;
+    grid.removeAttribute('aria-busy');
+    grid.classList.remove('is-updating');
+    if (!reducedMotion.matches && dialog.open) {
+      grid.getAnimations().forEach(animation => animation.cancel());
+      grid.animate([{ opacity: .4, transform: 'translateY(4px)' }, { opacity: 1, transform: 'translateY(0)' }], {
+        duration: 240, easing: 'cubic-bezier(.22,.8,.25,1)'
+      });
+    }
+  }
   dialog.querySelector('[data-close]').onclick = () => dialog.close();
 
   const open = document.createElement('button');
@@ -73,10 +91,12 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
       if (current !== request) return;
       const videos = collections.get(prefs.collection);
       $('#yt-grid').replaceChildren(...videos.map(video => card(video, account)));
+      finishUpdate();
       $('#yt-status').textContent = videos.length ? '' : 'Nada por aqui ainda.';
     } catch (error) {
       if (current !== request) return;
       $('#yt-grid').replaceChildren(); $('#yt-status').textContent = cleanError(error);
+      finishUpdate();
     }
   }
 
@@ -85,7 +105,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
   dialog.addEventListener('scroll', () => {
     if (!more.hidden && !more.disabled && dialog.scrollHeight - dialog.scrollTop - dialog.clientHeight < 450) loadMore();
   });
-  dialog.addEventListener('close', () => { request++; paging = null; });
+  dialog.addEventListener('close', () => { request++; paging = null; grid.inert = false; grid.classList.remove('is-updating'); grid.removeAttribute('aria-busy'); });
 
   async function loadMore() {
     const state = paging;
@@ -110,7 +130,12 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
         candidates = pickVideos(state.category, state.channels.map(c => c.videos), state.period, Infinity).filter(v => !state.seen.has(v.id));
       }
       const batch = candidates.slice(0, 30);
-      for (const video of batch) { state.seen.add(video.id); $('#yt-grid').append(card(video, state.category)); }
+      const cards = batch.map(video => { state.seen.add(video.id); return card(video, state.category); });
+      if (state.replace) {
+        grid.replaceChildren(...cards);
+        state.replace = false;
+        finishUpdate();
+      } else grid.append(...cards);
       const hasMore = candidates.length > batch.length || state.channels.some(c => !c.done);
       more.hidden = !hasMore;
       $('#yt-status').textContent = failed ? 'Alguns canais não responderam. Tente carregar mais novamente.' : !state.seen.size ? (hasMore ? 'Nenhum resultado nesta página. Continue buscando mais vídeos.' : 'Nenhum vídeo encontrado com esse filtro.') : '';
@@ -119,6 +144,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
       more.disabled = !hasMore;
     } catch {
       if (state.current !== request) return;
+      if (state.replace) finishUpdate();
       $('#yt-status').textContent = 'Não foi possível carregar mais vídeos. Tente novamente.';
       more.textContent = 'Tentar novamente'; more.disabled = false;
     } finally { state.busy = false; }
@@ -130,7 +156,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     if (prefs.category === 'account' && !connected) prefs.category = 'study';
     const current = ++request;
     paging = null; more.hidden = true; more.disabled = false;
-    $('#yt-grid').replaceChildren();
+    beginUpdate();
     dialog.scrollTop = 0;
     dialog.querySelectorAll('[data-yt-category]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ytCategory === prefs.category));
     $('.yt-account').hidden = true;
@@ -147,7 +173,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
       channels.at = Date.now();
       feeds.set(category.id, channels);
     }
-    paging = { current, category, period: category.period ? prefs.period : 'all', channels: feeds.get(category.id), seen: new Set(), busy: false };
+    paging = { current, category, period: category.period ? prefs.period : 'all', channels: feeds.get(category.id), seen: new Set(), busy: false, replace: true };
     more.hidden = false;
     await loadMore();
   }
@@ -156,6 +182,7 @@ export function initYouTubeCatalog({ preferences, save, toast, play }) {
     const category = event.target.closest('[data-yt-category]')?.dataset.ytCategory;
     const period = event.target.closest('[data-yt-period]')?.dataset.ytPeriod;
     const collection = event.target.closest('[data-yt-collection]')?.dataset.ytCollection;
+    if ((category && category === prefs.category) || (period && period === prefs.period) || (collection && collection === prefs.collection)) return;
     if (category) prefs.category = category;
     if (period) prefs.period = period;
     if (collection) prefs.collection = collection;

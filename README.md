@@ -14,9 +14,13 @@
 - 🪟 **Painéis arrastáveis** e **modo foco**, que esconde as ferramentas quando você para de mexer.
 - 🔒 **Local de verdade**: SQLite no desktop, `localStorage` no navegador. Nada é enviado para fora.
 
-## Versão 0.3.5
+## Aparência e LiquidGlass
 
-**Miniplayer redesenhado:** vídeo sem cronômetro sobreposto e faixa escura inferior com tempo, pausa, reinício e identificação do ambiente. Corrigida a inicialização X11/XWayland no Linux para que **Sempre à frente** funcione de verdade. Inclui a categoria **Chuva** e a ajuda do contador na barra do Windows.
+Em **⚙ Aparência → Visual**, escolha **Sólido** ou **Glass**. O modo Glass combina painéis foscos com controles transparentes e refração nos botões, na seleção das abas e no interruptor. A opção fica salva no dispositivo.
+
+Segure a opção selecionada do Pomodoro ou das categorias e períodos do YouTube e arraste para trocar de opção ao soltar. A lente acompanha o gesto e se deforma durante o arraste. Também é possível clicar normalmente; **Esc** cancela um arraste em andamento.
+
+Os painéis usam tipografia, campos, cartões, ícones e gráficos padronizados. As barras de rolagem ficam ocultas, mas o conteúdo continua rolando. O catálogo do YouTube mantém o tamanho da janela e preserva os resultados anteriores durante o carregamento do próximo filtro.
 
 ## Instalar ou atualizar
 
@@ -74,6 +78,8 @@ O teste desktop usa um perfil temporário. Em containers e CI que bloqueiam o sa
 src/
   app.js, app.css           interface principal
   workspace.js, .css        painéis móveis, ambientes e modo foco
+  interiors.css             componentes internos e contraste dos painéis
+  liquid-glass.js            lentes LiquidGlass e seleção arrastável
   core.js                   cronômetro e agregação do histórico
   audio.js, ambience.js     mixer de áudio e músicas offline
   notes.js                  notas com busca
@@ -189,6 +195,7 @@ O token fica só na memória: ao recarregar a página, é preciso entrar de novo
 - Há pacotes só para **x64**. O instalador do Windows ainda não tem assinatura digital e não foi validado em uma máquina Windows real.
 - Existe um único perfil local por usuário do sistema. Ainda não há importação de backup nem sincronização.
 - No desktop, players externos podem ter restrições de reprodução.
+- O LiquidGlass usa WebGL com fundos de floresta e neutro. Sobre vídeos do YouTube, a refração fica indisponível porque o iframe externo não fornece seus pixels ao canvas; os controles mantêm o acabamento CSS e as animações. Preferências do sistema para reduzir movimento e transparência são respeitadas.
 - O modo na barra depende de suporte a ícones de bandeja. O Ubuntu já vem com ele. No GNOME puro, instale a extensão *AppIndicator*. Sem ela, o ícone não aparece, mas abrir o Sussa de novo traz a janela de volta.
 - O `npm audit` aponta 6 avisos moderados na cadeia de desenvolvimento do `electron-builder`. O app não tem dependências npm em produção.
 

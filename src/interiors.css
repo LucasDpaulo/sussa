@@ -1,0 +1,308 @@
+/* Detalhes internos compartilhados. A transparência externa fica em workspace.css. */
+.workspace{
+  --detail-text:#f8faff;
+  --detail-muted:#e3e8f2;
+  --detail-line:#ffffff24;
+  --detail-fill:linear-gradient(145deg,#ffffff0c,#ffffff03);
+  --detail-radius:14px;
+  --detail-control-radius:10px;
+  --detail-blue:#c5ddff;
+}
+.workspace :is(.floating-panel,dialog){
+  --ui-separator:var(--detail-line);
+  font-family:var(--ui-font);
+  font-size:13px;
+  line-height:1.45;
+  letter-spacing:-.12px;
+}
+.workspace[data-surface-style=glass] #workspace-ui>.floating-panel{
+  --muted:var(--detail-muted);
+  text-shadow:0 1px 1px #10152266;
+}
+.workspace :is(.floating-panel,dialog) :is(h2,h3){
+  color:var(--detail-text);
+  font-weight:600;
+  letter-spacing:-.25px;
+  line-height:1.35;
+}
+.workspace :is(.floating-panel,dialog) h2{font-size:15px}
+.workspace :is(.floating-panel,dialog) h3{font-size:13px}
+.workspace :is(.floating-panel,dialog) :is(.hint,small,.notes-help){
+  font-size:12px;
+  line-height:1.5;
+}
+.workspace :is(.floating-panel,dialog) :is(hr,fieldset){border-color:var(--detail-line)}
+.workspace :is(.floating-panel,dialog) hr{margin:20px 0}
+
+/* Geometria comum dos campos; ícones e mini-timer mantêm suas medidas. */
+.workspace :is(.floating-panel,dialog) :is(input:not([type=checkbox]):not([type=range]):not([type=file]),select,textarea){
+  font-family:var(--ui-font);
+  font-size:13px;
+  line-height:1.4;
+  letter-spacing:-.1px;
+  border-radius:var(--detail-control-radius);
+  border-color:var(--detail-line);
+  padding:9px 11px;
+}
+.workspace :is(.floating-panel,dialog) :is(input:not([type=checkbox]):not([type=range]):not([type=file]),select){min-height:36px}
+.workspace :is(.floating-panel,dialog) button:where(:not(.window-handle button):not(.mode-tabs button):not(#toggle-timer):not(#reset):not(.scene-card):not(.yt-card):not(.info-button):not(.close-button):not(.task>button)){
+  min-height:34px;
+  padding:7px 12px;
+  border-radius:var(--detail-control-radius);
+  font:500 12px/1.4 var(--ui-font);
+  letter-spacing:-.1px;
+}
+.workspace :is(.floating-panel,dialog) .room-menu-trigger{gap:12px;font-size:12px;font-weight:500}
+.workspace :is(.floating-panel,dialog) button:disabled{opacity:.5}
+.workspace :is(.floating-panel,dialog) :is(input[type=checkbox],input[type=range]){accent-color:var(--detail-blue)}
+.workspace :is(.floating-panel,dialog) input[type=checkbox]:not(#auto-hide){width:18px;height:18px}
+.workspace :is(.floating-panel,dialog) input[type=checkbox]:not(#auto-hide){appearance:none;position:relative;border:1px solid #ffffff70;border-radius:5px;background:#ffffff0c;cursor:pointer}
+.workspace :is(.floating-panel,dialog) input[type=checkbox]:not(#auto-hide):checked{background:var(--detail-blue);border-color:var(--detail-blue)}
+.workspace :is(.floating-panel,dialog) input[type=checkbox]:not(#auto-hide):checked::after{content:'';position:absolute;left:5px;top:2px;width:5px;height:9px;border-right:2px solid #21334e;border-bottom:2px solid #21334e;transform:rotate(45deg)}
+.workspace :is(.floating-panel,dialog) input[type=range]{appearance:none;height:4px;border:0;border-radius:999px;background:#ffffff30;cursor:pointer}
+.workspace :is(.floating-panel,dialog) input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:transparent}
+.workspace :is(.floating-panel,dialog) input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;margin-top:-5px;border:1px solid #ffffff80;border-radius:50%;background:#f1f6ff;box-shadow:0 1px 3px #17233c30}
+.workspace :is(.floating-panel,dialog) input[type=range]::-moz-range-track{height:4px;border-radius:999px;background:#ffffff30}
+.workspace :is(.floating-panel,dialog) input[type=range]::-moz-range-progress{height:4px;border-radius:999px;background:var(--detail-blue)}
+.workspace :is(.floating-panel,dialog) input[type=range]::-moz-range-thumb{width:14px;height:14px;border:1px solid #ffffff80;border-radius:50%;background:#f1f6ff}
+.workspace :is(.floating-panel,dialog) :is(output,input[type=number],input[type=date]){font-variant-numeric:tabular-nums}
+.workspace :is(.floating-panel,dialog) :is(button,input,textarea,summary):focus-visible{outline-color:var(--detail-blue)}
+
+/* Grupos de métricas com preenchimento, divisórias e alinhamentos comuns. */
+.workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary,.chart-card){
+  background:var(--detail-fill);
+  border:1px solid var(--detail-line);
+  border-radius:var(--detail-radius);
+  box-shadow:inset 0 1px 0 #ffffff0c;
+}
+.workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary){padding:16px 0}
+.workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary)>div{
+  min-width:0;
+  padding:0 16px;
+  text-align:left;
+}
+.workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary)>div+div{border-left-color:var(--detail-line)}
+.workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary) small{
+  display:block;
+  color:var(--detail-muted);
+  font-size:11px;
+  font-weight:500;
+  line-height:1.4;
+}
+.workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary) strong{
+  display:block;
+  margin-top:6px;
+  font:600 24px/1.2 var(--ui-font);
+  letter-spacing:-.65px;
+  font-variant-numeric:tabular-nums;
+}
+.workspace #viewport-1-winner-stats .streak-summary strong{color:#ffd0b4}
+.workspace .streak-summary strong svg{width:22px;height:22px;vertical-align:-2px;stroke-width:1.8}
+.workspace #viewport-1-winner-stats .stats-summary strong{color:var(--detail-text)}
+.workspace #viewport-1-winner-stats .stats-controls{gap:12px;padding-top:0;border-top:0;align-items:center}
+.workspace #viewport-1-winner-stats .stats-controls .room-menu-trigger{
+  min-height:34px;
+  padding:7px 11px;
+  border:1px solid var(--detail-line);
+  border-radius:var(--detail-control-radius);
+}
+.workspace #viewport-1-winner-stats .chart-card{padding:16px}
+.workspace #viewport-1-winner-stats .chart-heading{align-items:baseline;margin-bottom:18px;font-size:12px;font-weight:600}
+.workspace #viewport-1-winner-stats #chart-unit{color:var(--detail-muted);font-size:11px;font-weight:400}
+.workspace #viewport-1-winner-stats #chart-scale{font-size:11px;font-weight:400}
+.workspace #viewport-1-winner-stats .chart-layout{grid-template-columns:46px minmax(0,1fr);gap:12px}
+.workspace #viewport-1-winner-stats #chart .bar-column>span{font-size:11px;font-weight:400}
+.workspace #viewport-1-winner-stats #chart .bar-track i{
+  background:linear-gradient(180deg,#c6deff,#9cbfff);
+  border-radius:6px 6px 2px 2px;
+  box-shadow:inset 0 1px 0 #ffffff70;
+}
+.workspace #viewport-1-winner-stats .stats-footer{gap:12px;align-items:center}
+.workspace #viewport-1-winner-stats .stats-footer button{min-height:32px;padding:7px 10px;font-size:11px}
+
+/* Listas e estados vazios. */
+.workspace #viewport-1-winner-tasks header{gap:12px;margin-bottom:16px;align-items:center}
+.workspace #viewport-1-winner-tasks header small{margin-top:5px}
+.workspace #viewport-1-winner-tasks h2{display:flex;align-items:center;gap:8px}
+.workspace #viewport-1-winner-tasks h2 svg{width:17px;height:17px;flex:none}
+.workspace #task-date{font-size:12px}
+.workspace .task-source{padding:12px 0;margin-bottom:16px;border-color:var(--detail-line);font-size:11px;line-height:1.5}
+.workspace #task-form{gap:8px;margin-bottom:12px}
+.workspace #task-form>button{min-width:38px;font-size:18px;line-height:1;padding:8px}
+.workspace .task{min-height:48px;padding:12px 0;border-color:var(--detail-line)}
+.workspace .task label{gap:12px;line-height:1.5;font-size:13px}
+.workspace .task>button{color:var(--detail-muted)}
+.workspace .empty{padding:28px 12px 32px}
+.workspace .empty>span{font-size:32px;margin-bottom:12px;opacity:.7}
+.workspace .empty p{font:500 15px/1.4 var(--ui-font);letter-spacing:-.25px;margin-bottom:6px}
+.workspace :is(.calendar-event,.google-service){min-height:52px;border-color:var(--detail-line)}
+.workspace .notes-toolbar{gap:8px;margin-bottom:16px}
+.workspace .note-item{padding:11px 12px;border-radius:12px}
+.workspace .note-item strong{font-size:13px;font-weight:500;line-height:1.4}
+.workspace .note-item span{font-size:11px;line-height:1.5;margin-top:4px}
+.workspace #note-editor{margin-top:16px;padding-top:16px;border-color:var(--detail-line)}
+.workspace #note-title{font-size:15px;font-weight:600;letter-spacing:-.25px}
+.workspace #note-body{font:400 13px/1.65 var(--ui-font);padding:12px;border-radius:12px}
+.workspace .note-actions{gap:8px}
+.workspace #note-status{font-size:11px;margin-top:12px}
+.workspace #delete-note{color:#ffd2cc}
+
+/* Sons, mídia e ambientes. */
+.workspace .sound-row{grid-template-columns:minmax(106px,1fr) minmax(72px,1fr) 36px;gap:12px;min-height:40px;margin:8px 0;font-size:12px}
+.workspace .sound-row output{font-size:11px;color:var(--detail-muted)}
+.workspace #mixer .sound-row>span{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.workspace #mixer .sound-row>span svg{width:16px;height:16px;flex:none;opacity:.9}
+.workspace .sound-row.master{padding-bottom:12px;margin-bottom:12px;border-color:var(--detail-line)}
+.workspace #ambience-controls>label:not(.sound-row){font-size:12px;line-height:1.5;margin:16px 0}
+.workspace #ambience-controls>button{margin:8px 0 12px}
+.workspace #ambience-controls .hint{font-size:11px;line-height:1.55}
+.workspace :is(.media-empty,#scene-now){background:var(--detail-fill);border:1px solid var(--detail-line);border-radius:var(--detail-radius);padding:16px}
+.workspace .media-empty>span{font-size:30px}
+.workspace .media-empty>span svg{width:30px;height:30px;margin:auto}
+.workspace .media-empty p{font:500 14px/1.4 var(--ui-font);margin:8px 0}
+.workspace .media-empty small{font-size:11px}
+.workspace #media-form{gap:8px}
+.workspace #scene-now{gap:5px}
+.workspace #scene-now>span{font-size:10px;letter-spacing:.8px;font-weight:600;color:#ffd0b4}
+.workspace #scene-now>b{font-size:13px;font-weight:500;line-height:1.45}
+.workspace #scene-now>small{font-size:11px;color:var(--detail-muted)}
+.workspace .scene-section{margin:20px 0 10px;font-size:11px;letter-spacing:.5px;font-weight:600;color:var(--detail-muted)}
+.workspace .scene-options{gap:12px}
+.workspace .scene-card{border-radius:12px}
+.workspace .scene-card span{font-size:12px;padding:10px 12px;line-height:1.4}
+.workspace .scene-card[aria-pressed=true]{border-color:var(--detail-blue);box-shadow:0 0 0 1px var(--detail-blue)}
+.workspace .yt-filters{gap:12px}
+.workspace .yt-title{font-size:13px;font-weight:500;line-height:1.45;letter-spacing:-.15px}
+.workspace .yt-card small{font-size:11px;line-height:1.5}
+.workspace #youtube-catalog{height:min(820px,calc(100dvh - 32px));max-height:calc(100dvh - 32px)}
+.workspace #youtube-catalog #yt-status{min-height:18px;margin:10px 0;font-size:12px;line-height:1.5}
+.workspace #yt-grid{transition:opacity 160ms ease}
+.workspace #yt-grid.is-updating{opacity:.45;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.workspace #yt-grid{transition:none}}
+
+/* Preferências e formulários com linhas estáveis e seções separadas. */
+.workspace #settings>label{min-height:56px;padding:12px 0;font-size:13px;gap:16px;border-color:var(--detail-line)}
+.workspace #settings>header h2{font-size:17px;font-weight:600}
+.workspace #settings>p{font-size:12px;line-height:1.55;color:var(--detail-muted)}
+.workspace #settings>button{min-height:38px;padding:9px 12px;margin-top:12px;font-size:13px}
+.workspace #settings>hr{margin:20px 0 4px}
+.workspace #settings #hide-after{font-size:13px}
+.workspace #google-account h3{font-size:13px;font-weight:600;margin:0 0 8px}
+.workspace #google-account #google-state{font-size:12px;line-height:1.55;color:var(--detail-muted);margin-bottom:12px}
+.workspace #google-account .google-service{padding:12px 0;gap:12px;border-color:var(--detail-line)}
+.workspace #google-account .google-service b{font-size:13px;font-weight:500}
+.workspace #google-account .google-service small{font-size:11px;line-height:1.5;color:var(--detail-muted);margin-top:3px}
+.workspace #timer-config :is(.duration-settings,.alarm-settings) legend{font-size:12px;font-weight:600;margin-bottom:10px}
+.workspace #timer-config :is(.duration-settings,.alarm-settings)>label{font-size:12px;min-height:48px;gap:12px}
+.workspace #timer-config #settings-form>button.primary{min-height:36px;font-size:13px;margin-top:16px}
+
+/* Campos numéricos sem o controle preto nativo; as setas do teclado continuam. */
+.workspace input[type=number]{appearance:textfield;-moz-appearance:textfield}
+.workspace input[type=number]::-webkit-inner-spin-button,
+.workspace input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.workspace #viewport-1-winner-hero #toggle-timer{border-radius:999px}
+.workspace #viewport-1-winner-hero #reset{border-radius:999px}
+
+/* Categorias e períodos usam a mesma lente móvel do Pomodoro. */
+.workspace .yt-tabs.liquid-tabs{position:relative;isolation:isolate;flex-wrap:nowrap;overflow-x:auto;max-width:100%;gap:4px;padding:3px;border:1px solid transparent;border-radius:999px}
+.workspace .yt-tabs.liquid-tabs button{flex:none;white-space:nowrap;border-radius:999px}
+.workspace[data-surface-style=glass] #youtube-catalog .yt-tabs.liquid-tabs{background:transparent!important;box-shadow:none;touch-action:pan-y;user-select:none}
+.workspace[data-surface-style=glass] .yt-tabs.liquid-tabs button{background:transparent!important;border-color:transparent;box-shadow:none;color:#e3e8f2}
+.workspace[data-surface-style=glass] .yt-tabs.liquid-tabs button[aria-pressed=true]{color:#fff;cursor:grab}
+.workspace[data-surface-style=glass] .yt-tabs.liquid-held{--liquid-stretch:1.08;--liquid-height:.92;cursor:grabbing}
+.workspace[data-surface-style=glass] .yt-tabs.liquid-held button{cursor:grabbing}
+.workspace[data-surface-style=glass] .yt-tabs.liquid-held .liquid-mode-indicator{border-color:#ffffffaa;filter:brightness(1.14)}
+.workspace[data-surface-style=glass] .yt-tabs.liquid-dragging .liquid-mode-indicator{transition:transform 45ms linear,width 120ms ease}
+
+/* A configuração do timer precisa de contraste próprio sobre o vídeo. */
+.workspace[data-surface-style=glass] #timer-config #settings-form{
+  --text:#fff;
+  --muted:#f0f4fc;
+  color:var(--text);
+  text-shadow:0 1px 2px #14203b99;
+}
+.workspace[data-surface-style=glass] #timer-config #settings-form :is(label,legend,legend span,small,output){
+  color:var(--text);
+  font-weight:500;
+}
+.workspace[data-surface-style=glass] #timer-config #settings-form :is(input[type=number],.room-menu-trigger,button){
+  color:#fff;
+  border-color:#ffffff60;
+  font-weight:600;
+}
+
+/* Texto secundário permanece legível também nos diálogos translúcidos. */
+.workspace[data-surface-style=glass] :is(dialog,.info-popover,.room-menu){
+  --text:#f8faff;
+  --muted:#eef2fa;
+  --detail-muted:#eef2fa;
+  color:var(--text);
+  text-shadow:0 1px 2px #10152280;
+}
+.workspace[data-surface-style=glass] :is(dialog,.info-popover,.room-menu) :is(p,small,label,summary,.hint){
+  color:var(--muted);
+}
+.workspace[data-surface-style=glass] #settings #google-account :is(label,summary,.hint,#google-state,.google-service small){
+  color:#eef2fa;
+}
+.workspace[data-surface-style=glass] :is(dialog,.info-popover,.room-menu) :is(input,textarea)::placeholder{
+  color:#e1e7f3;
+  opacity:1;
+}
+
+/* Textos de preferências menores e sem truncamento em janelas estreitas. */
+.workspace #settings :is(p,small,label,summary,.hint){
+  font-size:12px;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+.workspace #settings #google-account :is(.hint,#google-state,.google-service small){font-size:11.5px}
+.workspace #settings #google-account label{grid-template-columns:minmax(0,1fr);min-width:0;font-size:12px}
+.workspace #settings #google-account input{display:block;width:100%;min-width:0;max-width:none;font-size:12px}
+.workspace #settings :is(section,details,.google-service>div){min-width:0}
+.workspace #settings .google-service{flex-wrap:wrap}
+.workspace #settings .google-service>div{flex:1 1 180px}
+.workspace #settings button{white-space:normal;overflow-wrap:anywhere}
+.workspace #settings .room-menu-trigger>span{white-space:normal;overflow:visible;text-overflow:clip}
+
+/* Painéis de conteúdo têm mais proteção visual que barras e controles. */
+.workspace[data-surface-style=glass] #workspace-ui>.floating-panel,
+.workspace[data-surface-style=glass] :is(dialog,#settings,.info-popover,.room-menu),
+.workspace[data-surface-style=glass] #timer-config #settings-form{
+  background-color:#e8efff18!important;
+  background-image:linear-gradient(145deg,#ffffff0e,#ffffff03)!important;
+  backdrop-filter:blur(40px) saturate(105%)!important;
+  -webkit-backdrop-filter:blur(40px) saturate(105%)!important;
+}
+.workspace[data-surface-style=glass] #timer-config #settings-form{
+  background-color:#34415e40!important;
+  background-image:linear-gradient(145deg,#ffffff08,#ffffff02)!important;
+}
+@media(min-height:161px){
+  .workspace.compact-mode[data-surface-style=glass] #workspace-ui>#viewport-1-winner-hero{
+    background:transparent!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+}
+@media(prefers-reduced-transparency:reduce){
+  .workspace[data-surface-style=glass] #workspace-ui>.floating-panel,
+  .workspace[data-surface-style=glass] :is(dialog,#settings,.info-popover,.room-menu),
+  .workspace[data-surface-style=glass] #timer-config #settings-form{
+    background:#292f39!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+}
+
+@media(max-width:600px){
+  .workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary)>div{padding:0 10px}
+  .workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary) strong{font-size:21px}
+  .workspace #viewport-1-winner-stats :is(.streak-summary,.stats-summary) small{font-size:10px}
+  .workspace #viewport-1-winner-stats .chart-card{padding:12px}
+  .workspace #viewport-1-winner-stats .chart-layout{grid-template-columns:40px minmax(0,1fr);gap:8px}
+  .workspace #viewport-1-winner-stats #chart-scale,.workspace #viewport-1-winner-stats #chart .bar-column>span{font-size:10px}
+  .workspace #viewport-1-winner-stats #chart-unit{display:none}
+  .workspace .sound-row{gap:8px}
+}

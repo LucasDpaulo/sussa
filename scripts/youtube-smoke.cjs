@@ -41,8 +41,10 @@ app.whenReady().then(async () => {
       if(new Set([...document.querySelectorAll('.yt-card')].map(v=>v.dataset.video)).size!==66)throw Error('Duplicate cards');
       fail = true;
       $('[data-yt-category=sea]').click();
+      if(count()!==66 || !$('#yt-grid').inert || $('#yt-grid').getAttribute('aria-busy')!=='true')throw Error('Category switch removed the previous list before loading');
       await wait(()=>$('#yt-status').textContent.includes('não responderam'));
       if(count())throw Error('Previous category remained visible');
+      if($('#yt-grid').inert || $('#yt-grid').hasAttribute('aria-busy'))throw Error('Grid remained blocked after loading');
       fail = false;
       $('#yt-more').click();
       await wait(()=>count()===30);
@@ -60,7 +62,10 @@ app.whenReady().then(async () => {
       await new Promise(r=>setTimeout(r,80));
       if(![...document.querySelectorAll('.yt-card')].every(v=>v.dataset.video.startsWith('UC')))throw Error('Invalid cards');
       if($('[data-yt-category=study]').getAttribute('aria-pressed')!=='true'||count()!==30)throw Error('Stale response changed category');
-      return 'PASS: scrolling, pagination, deduplication, end of list, retry, period and category switching';
+      const previousCalls = calls.length;
+      $('[data-yt-category=study]').click();
+      if(calls.length!==previousCalls || $('#yt-grid').inert)throw Error('Selected category triggered another load');
+      return 'PASS: scrolling, pagination, deduplication, retry, smooth category switching, stale responses and repeated selection';
     })()`));
   } catch (error) { console.error(error); process.exitCode = 1; }
   finally { clearTimeout(timeout); app.quit(); }
