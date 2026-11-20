@@ -72,28 +72,6 @@ jobs:
         if: runner.os == 'Windows'
         run: npm run test:youtube
 
-      - name: Incluir cliente OAuth do Sussa nos instaladores
-        if: needs.version.result == 'success'
-        shell: bash
-        env:
-          GOOGLE_DESKTOP_OAUTH_JSON: ${{ secrets.GOOGLE_DESKTOP_OAUTH_JSON }}
-        run: |
-          node --input-type=module <<'NODE'
-          import { writeFileSync } from 'node:fs';
-          let client;
-          try {
-            client = JSON.parse(process.env.GOOGLE_DESKTOP_OAUTH_JSON).installed;
-          } catch {
-            throw new Error('Configure GOOGLE_DESKTOP_OAUTH_JSON com o JSON do cliente para computador.');
-          }
-          if (!client?.client_id?.endsWith('.apps.googleusercontent.com') || !client.client_secret) {
-            throw new Error('O JSON precisa conter as credenciais de um cliente para computador.');
-          }
-          writeFileSync('desktop/google-client.json', JSON.stringify({
-            clientId: client.client_id, clientSecret: client.client_secret
-          }), { mode: 0o600 });
-          NODE
-
       - if: needs.version.result == 'success' && runner.os == 'Linux'
         run: npm run pack:linux
       - if: needs.version.result == 'success' && runner.os == 'Windows'

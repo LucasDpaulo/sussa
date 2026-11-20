@@ -85,13 +85,10 @@ src/
   notes.js                  notas com busca
   tray.js                   modo na barra do sistema (desktop)
   youtube.js, youtube-catalog.js  catálogo de vídeos do YouTube
-  google-account.js         seção Conta Google em Aparência
   scene-bar.js              barra de controle do vídeo de fundo
-  calendar.js               integração opcional, somente leitura, com o Google Agenda
 desktop/
   main.cjs, preload.cjs     processo principal do Electron
   store.cjs                 persistência em SQLite
-  google.cjs                conta Google (login, Agenda e YouTube) no desktop
   youtube.cjs               playlists públicas paginadas do YouTube (desktop e servidor web)
 assets/                     imagens e áudios (ver Créditos)
 tests/                      testes com node:test
@@ -108,7 +105,7 @@ Em **Ambientes → Explorar vídeos do YouTube**, escolha uma categoria e clique
 - O YouTube escolhe a qualidade sozinho, pelo tamanho do player e pela internet, e não aceita pedido de qualidade vindo de apps. Por isso o Sussa renderiza o player com pelo menos 1920×1080, mesmo quando ele aparece menor na tela, e assim mantém 1080p.
 - Os vídeos tocam pelo player oficial do YouTube e **podem exibir anúncios**. Se o autor proibir tocar o vídeo fora do YouTube, o Sussa avisa e o vídeo fica marcado.
 - Na versão web, o `npm run dev` busca as playlists por você, porque o YouTube não permite que a página os leia diretamente.
-- A paginação depende do formato público das playlists do YouTube, que pode mudar. As coleções de **Sua conta** mantêm o carregamento existente. Teste isolado de rolagem, filtros e recuperação de conexão: `npm run test:youtube` (em ambiente restrito de desenvolvimento, pode exigir `-- --no-sandbox`).
+- A paginação depende do formato público das playlists do YouTube, que pode mudar. Teste isolado de rolagem, filtros e recuperação de conexão: `npm run test:youtube` (em ambiente restrito de desenvolvimento, pode exigir `-- --no-sandbox`).
 - No modo na barra, um vídeo de fundo sem som é pausado para economizar bateria e volta quando a janela reaparece.
 
 ## Picture-in-picture (desktop)
@@ -138,57 +135,11 @@ Para economizar bateria, o vídeo de fundo pausa enquanto a janela está escondi
 - **Desktop:** histórico, tarefas, notas e preferências ficam em `workspace.sqlite`, em `~/.config/sussa` no Linux e em `%APPDATA%\sussa` no Windows. O botão **⚙ Aparência → Abrir pasta dos dados** mostra o local exato. Para fazer backup, feche o app e copie a pasta.
 - **Navegador:** os dados ficam no `localStorage` daquele navegador e endereço. Limpar os dados do site apaga o histórico. Use **Exportar histórico** para guardar uma cópia em JSON.
 - Os dados não são sincronizados nem criptografados, e o desktop e o navegador não compartilham dados entre si.
-- Sem internet, funcionam o cronômetro, as tarefas, as notas, as estatísticas e os ambientes incluídos. Só os vídeos do YouTube, os players por URL do painel Mídia (YouTube, Spotify, Apple Music) e o Google Agenda dependem de internet.
+- Sem internet, funcionam o cronômetro, as tarefas, as notas, as estatísticas e os ambientes incluídos. Só os vídeos do YouTube, os players por URL do painel Mídia (YouTube, Spotify, Apple Music) dependem de internet.
 
 ### Como o cronômetro se comporta
 
 O tempo é medido pelo relógio, não por contagem de ticks, então o estado volta ao recarregar ou reabrir. Se você fechar com uma sessão rodando, ela continua contando até o fim. Pause antes de fechar para evitar isso. As **4 bolinhas** ao lado do título do painel Pomodoro mostram o ciclo: cada foco concluído até o fim preenche uma. Pausas curtas e longas não contam, e um foco interrompido também não. Concluir a pausa longa zera o ciclo, assim como a virada do dia. Um quinto foco sem pausa longa começa um ciclo novo. O alarme só toca com o app aberto. Nenhuma etapa começa sozinha. Na versão de navegador, só uma aba por vez pode registrar foco.
-
-## Conta Google no app desktop (opcional)
-
-Em **⚙ Aparência → Conta Google**, cada serviço tem o seu botão **Conectar**, que pede só a permissão daquele serviço. Dá para ligar só a Agenda, só o YouTube ou os dois, e o segundo se soma ao primeiro sem refazer nada. Tudo é **somente leitura**:
-- **Agenda**: os eventos do dia aparecem no painel Tarefas e podem virar tarefas.
-- **YouTube**: a categoria **★ Sua conta** em Explorar YouTube, com seus vídeos curtidos, os vídeos recentes dos canais que você assina e suas playlists.
-
-O login abre na página do Google, no navegador, e volta para o Sussa por um endereço local (`127.0.0.1`). O Sussa nunca vê a sua senha. Os tokens ficam só no processo principal do app, cifrados com o chaveiro do sistema, e a página nunca os recebe. **Desconectar conta** revoga o acesso no Google.
-
-O vídeo continua tocando pelo player incorporado, sem a sua sessão do YouTube. Por isso o Premium não se aplica e podem aparecer anúncios.
-
-### Para mantenedores: credenciais embutidas
-
-Para que quem usa só precise clicar em **Conectar**, o pacote leva as credenciais OAuth do app em `desktop/google-client.json`. Esse arquivo fica fora do git (está no `.gitignore`):
-
-```json
-{ "clientId": "…apps.googleusercontent.com", "clientSecret": "GOCSPX-…" }
-```
-
-Para criá-las (uma vez, de graça):
-1. Em [console.cloud.google.com](https://console.cloud.google.com/), crie um projeto (por exemplo, "Sussa").
-2. Em **APIs e serviços → Biblioteca**, ative a **Google Calendar API** e a **YouTube Data API v3**.
-3. Em **Tela de consentimento OAuth** (Google Auth Platform), escolha **Externo** e preencha nome e e-mail de contato. Enquanto o app estiver em teste, adicione como **usuários de teste** os e-mails de quem vai usar (até 100).
-4. Em **Credenciais → Criar credenciais → ID do cliente OAuth**, escolha o tipo **App para computador**.
-
-Em apps instalados, o Google não trata o client secret como segredo (ele vai dentro do pacote). Enquanto o app não for verificado pelo Google, a tela de login mostra "o Google não verificou este app" (clique em **Continuar**). Para liberar a qualquer pessoa sem esse aviso, é preciso enviar o app para verificação, com página inicial e política de privacidade.
-
-Sem o arquivo, por exemplo num fork, a seção mostra **Credenciais próprias do Google Cloud**, onde quem usa cola as próprias credenciais.
-
-## Google Agenda na versão web (opcional)
-
-O Sussa pode listar os eventos do dia da sua agenda Google, inclusive a que você usa pelo Notion Calendar, e transformá-los em tarefas locais. A integração é **somente leitura**, com o escopo `calendar.events.readonly`. Hoje está disponível só na versão de navegador e **ainda não foi validada com uma conta real**.
-
-<details>
-<summary>Configurar</summary>
-
-1. No [Google Cloud Console](https://console.cloud.google.com/), crie um projeto e ative a **Google Calendar API**.
-2. Configure a tela de consentimento OAuth. Se o app estiver em modo de teste, adicione seu e-mail como usuário de teste.
-3. Crie um **OAuth Client ID** do tipo **Web application**, com a origem autorizada `http://127.0.0.1:5173`.
-4. No Sussa, abra **Conectar agenda** e cole só o **Client ID público** (termina em `.apps.googleusercontent.com`). Nunca use o Client Secret.
-5. Deixe a agenda como `primary` ou informe o ID dela, que fica em Google Agenda → Configurações → Integrar agenda.
-6. Clique em **Preparar conexão** e depois em **Entrar com Google**.
-
-O token fica só na memória: ao recarregar a página, é preciso entrar de novo. Referências: [token model](https://developers.google.com/identity/oauth2/web/guides/use-token-model) e [events.list](https://developers.google.com/workspace/calendar/api/v3/reference/events/list).
-
-</details>
 
 ## Limitações conhecidas
 

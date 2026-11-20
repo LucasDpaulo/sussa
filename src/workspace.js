@@ -2,7 +2,6 @@ import { initLiquidGlass } from './liquid-glass.js';
 import { embedUrl } from './core.js';
 import { initYouTubeCatalog } from './youtube.js';
 import { initSceneBar } from './scene-bar.js';
-import { initGoogleAccount } from './google-account.js';
 import { initCompact } from './compact.js';
 import { transitionSurface, initDialogs, initContextHelp, initRoomMenu, icon } from './interface.js';
 
@@ -61,7 +60,6 @@ export function initWorkspace({state, save, toast}) {
   settings.querySelector('[data-close]').onclick=()=>settings.close();
   $('#notify').onclick=async()=>{if(!('Notification'in window))return toast('Este navegador não oferece notificações.');toast(await Notification.requestPermission()==='granted'?'Avisos ativados.':'Avisos não autorizados.');};
   if(window.desktopApp){const data=document.createElement('button');data.id='open-data';data.type='button';data.textContent='Abrir pasta dos dados';data.onclick=()=>window.desktopApp.openDataFolder();$('#notify').after(data);}
-  initGoogleAccount({toast});
   $('#appearance').onclick=()=>{wake();settings.showModal();};
   $('#surface-style').value=preferences.surfaceStyle;
   $('#surface-style').onchange=e=>{

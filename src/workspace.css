@@ -27,8 +27,6 @@ body.workspace,html:has(body.workspace){height:100%;overflow:hidden;background:#
 .workspace .empty{padding:25px 5px}
 .workspace .empty p{font-size:14px}
 .workspace .empty>span{font-size:28px;margin-bottom:8px}
-.workspace .task-source{align-items:flex-start;font-size:10px}
-.workspace .task-source button{font-size:10px}
 .workspace #task-date{max-width:136px;font-size:11px;padding:6px}
 .workspace #viewport-1-winner-tasks footer{font-size:10px}
 .workspace #workspace-ui>.floating-panel .timer-body{margin:8px 12px 0}
@@ -501,22 +499,6 @@ body.workspace[data-input-mode=pointer] :is(button,input,select,summary,a):focus
 .scene-card img,.scene-card .neutral-preview{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
 .scene-card .neutral-preview{background:radial-gradient(at 70% 0%,#4a515e,#1c2129)}
 .scene-card span{display:block;padding:7px 10px;font-size:12px}
-.workspace .yt-account{margin:-4px 0 14px;max-width:100%;overflow-x:auto;flex-wrap:nowrap}
-.workspace .yt-account button{white-space:nowrap}
-/* Conta Google em Aparência */
-#google-account h3{font-size:14px;margin:4px 0 6px}
-#google-account #google-state{font-size:12.5px;color:#c8cbd1;margin:0 0 10px}
-#google-account details{margin:0 0 10px}
-#google-account summary{cursor:pointer;font-size:13px;padding:6px 0}
-.workspace #settings #google-account label{display:grid;gap:6px;font-size:12px;border:0;padding:6px 0}
-.workspace #settings #google-account input{width:100%;max-width:none;box-sizing:border-box}
-#google-account button{width:100%;margin-top:8px}
-#google-account .google-service{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--ui-separator)}
-#google-account .google-service b{display:block;font-size:13.5px}
-#google-account .google-service small{display:block;font-size:11.5px;color:#a9adb5}
-.workspace #settings #google-account .google-service button{width:auto;min-width:118px;margin:0}
-#google-account #google-disconnect{margin-top:12px}
-#google-account details[hidden]{display:none}
 
 /* Miniplayer: vídeo desobstruído e controles em uma faixa própria. */
 #compact-mode{display:inline-flex;align-items:center;justify-content:center}

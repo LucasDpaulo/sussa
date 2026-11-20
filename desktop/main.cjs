@@ -2,18 +2,17 @@ const { app, BrowserWindow, protocol, net, ipcMain, Menu, shell, Tray, nativeIma
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { pathToFileURL } = require('node:url');
-const { mkdirSync } = require('node:fs');
+const { mkdirSync, rmSync } = require('node:fs');
 const { openStore } = require('./store.cjs');
 const youtube = require('./youtube.cjs');
 const { createCompactWindow } = require('./compact.cjs');
-const { createGoogle } = require('./google.cjs');
 const origin = 'app://workspace';
 const root = path.resolve(__dirname, '..');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } }]);
 // A stable directory preserves data when the application is updated.
 app.setPath('userData', path.join(app.getPath('appData'), 'sussa'));
 let audioPanel;
-let window, compact, store, google, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false, trayHintShown = false;
+let window, compact, store, tray = null, trayInfo = null, trayMenuKey = '', trayIcons = 0, timerRunning = false, quitting = false, closeHintShown = false, trayHintShown = false;
 // Modo na barra: a janela fica escondida (sem desenhar nada) e o timer aparece como ícone.
 function sendTray(command) { window?.webContents.send('tray:command', command); }
 function volumeBar({ volume, muted }) {
@@ -86,7 +85,8 @@ else {
   app.whenReady().then(async () => {
     mkdirSync(app.getPath('userData'), { recursive: true });
     store = openStore(path.join(app.getPath('userData'), 'workspace.sqlite'));
-    google = createGoogle(app.getPath('userData'));
+    // Versões antigas guardavam o login da conta Google aqui; o recurso foi removido, então o arquivo é apagado.
+    rmSync(path.join(app.getPath('userData'), 'google.json'), { force: true });
     protocol.handle('app', async request => {
       const url = new URL(request.url);
       const name = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
@@ -108,13 +108,6 @@ else {
       catch { event.returnValue = { error: 'Não foi possível salvar os dados locais' }; }
     });
     const guarded = fn => (event, ...args) => { if (!trusted(event)) throw new Error('Acesso inválido'); return fn(...args); };
-    ipcMain.handle('google:status', guarded(() => google.status()));
-    ipcMain.handle('google:configure', guarded(credentials => google.configure(credentials || {})));
-    ipcMain.handle('google:connect', guarded(service => google.connect(String(service))));
-    ipcMain.handle('google:disconnect', guarded(() => google.disconnect()));
-    ipcMain.handle('google:calendar', guarded((date, calendarId) => google.calendarEvents(String(date), calendarId)));
-    ipcMain.handle('google:youtube-library', guarded(() => google.youtubeLibrary()));
-    ipcMain.handle('google:youtube-collection', guarded((kind, id) => google.youtubeCollection(String(kind), id)));
     ipcMain.handle('youtube:page', (event, id, cursor) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.channelPage(String(id), cursor ?? null); });
     ipcMain.handle('youtube:channel', (event, id) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.channelVideos(String(id)); });
     ipcMain.handle('youtube:embeddable', (event, id) => { if (!trusted(event)) throw new Error('Acesso inválido'); return youtube.embeddable(String(id)); });

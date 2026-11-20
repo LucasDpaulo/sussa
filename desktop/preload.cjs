@@ -23,15 +23,6 @@ contextBridge.exposeInMainWorld('desktopYouTube', {
   embeddable: id => ipcRenderer.invoke('youtube:embeddable', id)
 });
 contextBridge.exposeInMainWorld('desktopApp', { openDataFolder: () => ipcRenderer.send('app:open-data') });
-contextBridge.exposeInMainWorld('desktopGoogle', {
-  status: () => ipcRenderer.invoke('google:status'),
-  configure: credentials => ipcRenderer.invoke('google:configure', credentials),
-  connect: service => ipcRenderer.invoke('google:connect', service),
-  disconnect: () => ipcRenderer.invoke('google:disconnect'),
-  calendar: (date, calendarId) => ipcRenderer.invoke('google:calendar', date, calendarId),
-  youtubeLibrary: () => ipcRenderer.invoke('google:youtube-library'),
-  youtubeCollection: (kind, id) => ipcRenderer.invoke('google:youtube-collection', kind, id)
-});
 
 contextBridge.exposeInMainWorld('desktopCompact', {
   control: action => ipcRenderer.invoke('window:control', action),
